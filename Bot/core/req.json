@@ -1,0 +1,8 @@
+{
+    "Manager":{"data": "const {Manager} = require('erela.js');\n"},
+    "Discord":{"data": "const {Client, Collection} = require('discord.js');\n"},
+
+    "http":{"data": "global. http = require('http');\n"},
+    "fs":{"data": "global.fs = require('fs');\n"},
+    "readdirSync":{"data": "const {readdirSync} = require('fs');\n"}
+}
