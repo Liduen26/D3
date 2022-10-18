@@ -13,7 +13,7 @@ Le chemin devrait être .../d3/Bot
 npm install
 ```
 
-Pour terminer le setup, demander à un membre du groupe D3 le fichier .env, et le mettre dans le dossier "Bot/".
+Pour terminer le setup, demander à un membre du groupe du projet D3 le fichier .env pour avoir accès au Token de l'API du bot, et le mettre dans le dossier "Bot/".
 
 ## Lancement
 
