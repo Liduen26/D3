@@ -1,8 +1,8 @@
 # Ce qu'on enlève
 *.mp4
 *.mp3
-core/config.js
 bot.zip
+.env
 
 # Exceptions 
 !assets/sounds/*
