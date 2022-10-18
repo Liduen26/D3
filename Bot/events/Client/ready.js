@@ -1,15 +1,6 @@
-const { log } = require('console');
-const Discord = require('discord.js');
-
-const {EmbedBuilder } = require("discord.js");
 const fs = require('fs');
-const { config } = require('process');
-
 
 module.exports = (Client) => {
-
-    //affiche sur la console le nom du bot
-    console.log(`Identifié en tant que ${Client.user.username}!`)
 
     //indique son statut
     Client.user.setPresence({
@@ -17,14 +8,11 @@ module.exports = (Client) => {
         status: "ONLINE"
     })
 
-    //indique son démarrage
-    console.log("Je suis en train de démarrer...");
-
     //récupére la liste des serveurs sur lequel il est ajouté
     const guilds_in = Client.guilds.cache.map(guild => guild);
     let list_guild_name = '';
 
-    console.log("______________________________________");
+    console.log("\nFichiers de config--------------------");
     global.main_configs = {};
     const dir_configs_files = "./configs_commands";
     main_configs.dir = dir_configs_files;
@@ -52,18 +40,17 @@ module.exports = (Client) => {
 
             // Stocke le contenu dans la var globale configs_files à l'indice = id de la guild
             main_configs[guild_info.id] = new_content;
-            console.log(`Fichier de config pour le serveur "${guild_info.name}" créé !`);
+            console.log(`>> Fichier du serveur "${guild_info.name}" créé !`);
         } else {
             // Le fichier existe déjà, on le lit
             const content = fs.readFileSync(`${dir_configs_files}/server${guild_info.id}.json`);
             
             // Stocke le contenu dans la var globale configs_files à l'indice = id de la guild
             main_configs[guild_info.id] = JSON.parse(content);
-            console.log(`Fichier de config pour le serveur "${guild_info.name}" chargé !`);
+            console.log(`> Fichier du serveur "${guild_info.name}" chargé !`);
         }
 
     }
-    console.log("______________________________________");
 
     //purge des commandes dans l'application
     Client.application.commands.cache.map(command => {
@@ -80,11 +67,12 @@ module.exports = (Client) => {
 
     //création des nouvelles commandes dans tous les serveur
     for (guild_info of Guilds_id) {
-        for (commands of slach_commands) {
+        for (commands of slash_commands) {
             Client.guilds.cache.get(guild_info).commands.create(commands);
         }
-
     }
 
+    //affiche sur la console le nom du bot
+    console.log(`\nIdentifié en tant que ${Client.user.username} !`)
     console.log("C'est parti !");
 }
