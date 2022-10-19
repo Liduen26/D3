@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { get } = require('http');
 
 module.exports = (Client) => {
 
@@ -52,15 +53,12 @@ module.exports = (Client) => {
 
     }
 
-    //purge des commandes dans l'application
-    Client.application.commands.cache.map(command => {
-        command.delete()
-    });
-
     //purge des commandes dans tous les serveurs
     const Guilds_id = Client.guilds.cache.map(guild => guild.id);
     for (guild_info of Guilds_id) {
+        console.log("test");
         Client.guilds.cache.get(guild_info).commands.cache.map(command => {
+            console.log("aaaaaaaaaaaaaaaaaaaaaaaaaa");
             command.delete()
         });
     }
