@@ -15,8 +15,8 @@ new SlashCommandBuilder()
 )
 ,
 new SlashCommandBuilder()
-.setName("wesh")
-.setDescription("JUL JUL JUL"),
+.setName("explosion")
+.setDescription("EXPLOOOOOOOOOOOOOOOOOSION"),
 
 new SlashCommandBuilder()
 .setName("bracelet")
@@ -25,5 +25,15 @@ new SlashCommandBuilder()
 	option.setName('utilisateur')
 	.setDescription("L'utilisateur qui va prendre le bracelet")
 	.setRequired(true)
+),
+
+new SlashCommandBuilder()
+.setName("nobracelet")
+.setDescription("Retire le bracelet electronique a l'utilisateur cible")
+.addUserOption(option => 
+	option.setName('utilisateur')
+	.setDescription("L'utilisateur qui va perdre le bracelet")
+	.setRequired(true)
 )
+
 ];
