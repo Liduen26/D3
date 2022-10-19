@@ -13,23 +13,6 @@ new SlashCommandBuilder()
 	.setDescription("message à envoyer")
 	.setRequired(true)
 )
-.addStringOption(option =>
-	option.setName("type")
-	.setDescription("Publiquement?")
-	// .addChoice("publique", "public")
-	// .addChoice("privée", "private")
-	.setRequired(false)
-)
-.addStringOption(option => 
-	option.setName("salon")
-	.setDescription("Où le message sera envoyer")
-	.setRequired(false)
-)
-.addStringOption(option => 
-	option.setName('user')
-	.setDescription("L'utilisateur à interpeller")
-	.setRequired(false)
-)
 ,
 new SlashCommandBuilder()
 .setName("wesh")

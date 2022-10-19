@@ -1,19 +1,24 @@
 //commande anti saturation du bot
 require('events').EventEmitter.defaultMaxListeners = 15;
 
-//affichage de la version de node qui lance ce bot
-console.log(process.version);
-
 //chargement du fichier de config et des variables
-const {TOKEN, PREFIX, D_Liia} = require('./core/config');
+const {TOKEN, PREFIX} = require('./core/config');
 //charquement de la lib discord V13
 const  {Client,GatewayIntentBits ,Collection} = require('discord.js');
 //chargement de la lib chargeur de fichier
-const {readdirSync} = require("fs");
+const { readdirSync, readFileSync} = require("fs");
 
-//chargement des function audio de discord
+//affichage de la version de node qui lance ce bot
+console.log("node : " + process.version);
 
-//initialisation du bot discord et déclaration des droits nécessaire
+const start = JSON.parse(readFileSync("./assets/starter/startD3.json", {encoding:'utf8'}));
+
+for (const line of start) {
+    console.log(line);
+}
+
+
+//initialisation du bot discord et déclaration des permissions nécessaires
 global.client = new Client({
     intents: [
         GatewayIntentBits.Guilds, 
@@ -22,17 +27,12 @@ global.client = new Client({
 });
 
 //création des commandes par /command
-global.slash_commands =require('./core/slash_commands').slc;
+global.slash_commands = require('./core/slash_commands').slc;
 
-//tableau qui contiendra tous les son de la commande rh
-//global.sound_list=[];
-//global.playlist=[];
 
-/*
-    recherche et chargement des slashCommand à appeller
-*/
+// Recherche et chargement des slashCommand à appeller
 
-console.log("______________________________________");
+console.log("\nCommandes slashs chargées-------------");
 global.commands_slashs=[];
 const loadSlashCommands = (dir = "./commands_slashs/") => {
     readdirSync(dir).forEach(dirs => {
@@ -40,70 +40,16 @@ const loadSlashCommands = (dir = "./commands_slashs/") => {
         for (const slashCommand of slashCommands) {
             const slcName = slashCommand.split(".")[0];
             commands_slashs[slcName]=require(`${dir}/${dirs}/${slashCommand}`);
-            console.log(`Commande slash chargée: /${slcName}`);
+            console.log(`> /${slcName}`);
         }
     });
 };
 loadSlashCommands();
-console.log("______________________________________");
-
-/*
-    recherche et chargement des events à surveiller
-*/
-const loadEvents = (dir = "./events/") => {
-    readdirSync(dir).forEach(dirs => {
-        const events = readdirSync(`${dir}/${dirs}/`).filter(files => files.endsWith('.js'));
-        for (const event of events) {
-            const evt = require(`${dir}/${dirs}/${event}`);
-            const evtName = event.split(".")[0];
-            client.on(evtName, evt.bind(null, client));
-            console.log(`Event chargé: ${evtName}`)
-        }
-        ;
-    });
-};
-loadEvents();
-console.log("______________________________________");
 
 
+// Recherche et chargement des boutons
 
-/*
-    recherche et chargement des différents fichiers de commandes
-*/
-['commands', 'cooldowns'].forEach(x => client[x] = new Collection());
-const loadCommands = (dir = "./commands_msg/") => {
-    readdirSync(dir).forEach(dirs => {
-        const commands = readdirSync(`${dir}/${dirs}/`).filter(files => files.endsWith('.js'));
-        for (const file of commands) {
-            const getFilename = require(`${dir}/${dirs}/${file}`);
-            client.commands.set(getFilename.help.name, getFilename);
-            console.log(`Commande chargée: ${getFilename.help.name}`);
-        }
-        ;
-    });
-};
-loadCommands();
-console.log("______________________________________");
-
-/*
-    recherche et chargement des tache cyclique
-*/
-const loadCycles = (dir = "./Cycle/") => {
-    readdirSync(dir).forEach(dirs => {
-        const cycles = readdirSync(`${dir}/${dirs}/`).filter(files => files.endsWith('.js'));
-        for (const cycle of cycles) {
-            const evt = require(`${dir}/${dirs}/${cycle}`);
-            console.log(`Commande cycliques: ${cycle}`)
-        }
-        ;
-    });
-};
-loadCycles();
-console.log("______________________________________");
-
-/*
-    recherche et chargement des boutons
-*/
+console.log("\nBoutons chargés-----------------------");
 global.buttons_tab=[];
 const loadButtons = (dir = "./buttons_responses/") => {
     readdirSync(dir).forEach(dirs => {
@@ -111,13 +57,63 @@ const loadButtons = (dir = "./buttons_responses/") => {
         for (const button of buttons) {
             const btnName = button.split(".")[0];
             buttons_tab[btnName] = require(`${dir}/${dirs}/${button}`);
-            console.log(`Bouton chargé : ${btnName}`);
+            console.log(`> ${btnName}`);
         }
         ;
     });
 };
 loadButtons();
-console.log("______________________________________");
 
+
+// Recherche et chargement des events à surveiller
+
+console.log("\nEvents chargés------------------------");
+const loadEvents = (dir = "./events/") => {
+    readdirSync(dir).forEach(dirs => {
+        const events = readdirSync(`${dir}/${dirs}/`).filter(files => files.endsWith('.js'));
+        for (const event of events) {
+            const evt = require(`${dir}/${dirs}/${event}`);
+            const evtName = event.split(".")[0];
+            client.on(evtName, evt.bind(null, client));
+            console.log(`> ${evtName}`)
+        }
+        ;
+    });
+};
+loadEvents();
+
+
+// Recherche et chargement des différents fichiers de commandes
+
+console.log("\nCommandes prefix chargées ("+ PREFIX +")---------");
+['commands', 'cooldowns'].forEach(x => client[x] = new Collection());
+const loadCommands = (dir = "./commands_msg/") => {
+    readdirSync(dir).forEach(dirs => {
+        const commands = readdirSync(`${dir}/${dirs}/`).filter(files => files.endsWith('.js'));
+        for (const file of commands) {
+            const getFilename = require(`${dir}/${dirs}/${file}`);
+            client.commands.set(getFilename.help.name, getFilename);
+            console.log(`> ${PREFIX}${getFilename.help.name}`);
+        }
+        ;
+    });
+};
+loadCommands();
+
+
+// Recherche et chargement des tache cyclique
+
+console.log("\nFonctions cycliques chargées----------");
+const loadCycles = (dir = "./Cycle/") => {
+    readdirSync(dir).forEach(dirs => {
+        const cycles = readdirSync(`${dir}/${dirs}/`).filter(files => files.endsWith('.js'));
+        for (const cycle of cycles) {
+            const evt = require(`${dir}/${dirs}/${cycle}`);
+            console.log(`> ${cycle}`)
+        }
+        ;
+    });
+};
+loadCycles();
 
 client.login(TOKEN);
