@@ -4,32 +4,39 @@ import { ref } from "vue";
 let windows = {
     "w-test": {
         x: ref(20),
-        y: ref(200)
+        y: ref(200),
+        moving: ref(false)
     }
 }
 
 let moving = ref(false);
 console.log(moving.value);
 
-function inMove(evt) {
-    moving.value = !moving.value;
+function inMove(event, myWindow) {
+    // Inversion de la valeur moving
+    myWindow.moving.value = !myWindow.moving.value;
 
-    console.log("weee");
-    console.log(moving.value);
+    console.log(event);
+    // const startX = e.x;
+    // const startY = e.y;
 
     window.addEventListener("mouseup", mouseUp);
     window.addEventListener("mousemove", mouseMove);
 
-    function mouseMove(evt) {
-        
+    function mouseMove(e) {
+        console.log(e);
+        // Application des coordonées
+        myWindow.x.value = e.x;
+        myWindow.y.value = e.y;
     }
 
 
-    function mouseUp(evt) {
-        moving.value = !moving.value;
-        console.log("up ", moving.value);
+    function mouseUp() {
+        // Inversion de la valeur moving
+        myWindow.moving.value = !myWindow.moving.value;
 
         window.removeEventListener("mouseup", mouseUp);
+        window.removeEventListener("mousemove", mouseMove);
     }
 }
 
@@ -39,16 +46,16 @@ function inMove(evt) {
     <header>
         <h1>Test fenètres déplaçables</h1>
     </header>
-    <page v-for="(window, index) of windows">
+    <div class="page" v-for="(window, index) of windows">
         <h3>{{window.objectName}}</h3>
 
-        <div class="default" :class="[moving.value ? 'move' : 'static']" :id="index" :style="{top: window.y.value + 'px', left: window.x.value + '%'}" >
-            <div class="w-picker" @mousedown="inMove(evt)"></div>
+        <div class="default" :class="[window.moving.value ? 'move' : 'static']" :id="index" :style="{top: window.y.value + 'px', left: window.x.value + 'px'}" >
+            <div class="w-picker" @mousedown="inMove(event, window)"></div>
 
             <div class="w-content"></div>
         </div>
 
-    </page>
+    </div>
 </template>
 
 <style scoped>
@@ -62,7 +69,7 @@ header{
     height: 10%;
 }
 
-page {
+.page {
     display: flex;
     flex-direction: column;
     flex-grow: 2;
@@ -84,7 +91,7 @@ page {
     flex-direction: column;
     border-radius: 10px;
 
-    transition: border-color .3s;
+    transition: border-color .2s;
 }
 
 .w-picker {
@@ -101,6 +108,6 @@ page {
 }
 
 .move {
-    border-color: blue;
+    border-color: cyan;
 }
 </style>
