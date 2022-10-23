@@ -1,5 +1,5 @@
 // Chargement du fichier .env
-require('dotenv').config()
+require('dotenv').config();
 
 // Chargement sur serveur HTTP
 exports.http = require('http');
