@@ -56,11 +56,23 @@ new SlashCommandBuilder()
 
 new SlashCommandBuilder()
 .setName("addtextchannel")
-.setDescription("ajoute une channel textuel au server")
+.setDescription("ajoute un channel textuel au server")
 .setDefaultMemberPermissions(0x08) // Perms admin requises
 .addStringOption(option => 
 	option.setName('channel')
 	.setDescription("Le nom du channel textuel a crée")
+	.setRequired(true)
+),
+
+new SlashCommandBuilder()
+.setName("delltextchannel")
+.setDescription("supprime un channel textuel au server")
+.setDefaultMemberPermissions(0x08) // Perms admin requises
+.addChannelOption(option => 
+	option
+	.setName('channel')
+	.setDescription('Channel a supprimer')
+	.addChannelTypes(ChannelType.GuildText)
 	.setRequired(true)
 )
 
