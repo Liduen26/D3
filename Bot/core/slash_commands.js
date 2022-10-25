@@ -34,6 +34,34 @@ new SlashCommandBuilder()
 	option.setName('utilisateur')
 	.setDescription("L'utilisateur qui va perdre le bracelet")
 	.setRequired(true)
+),
+new SlashCommandBuilder()
+.setName("ban")
+.setDescription("bannir un utilisateur du server")
+.setDefaultMemberPermissions(0x08) // Perms admin requises
+.addUserOption(option => 
+	option.setName('utilisateur')
+	.setDescription("L'utilisateur a bannir")
+	.setRequired(true)
+),
+new SlashCommandBuilder()
+.setName("kick")
+.setDescription("kick un utilisateur du server")
+.setDefaultMemberPermissions(0x08) // Perms admin requises
+.addUserOption(option => 
+	option.setName('utilisateur')
+	.setDescription("L'utilisateur a kick")
+	.setRequired(true)
+),
+
+new SlashCommandBuilder()
+.setName("addtextchannel")
+.setDescription("ajoute une channel textuel au server")
+.setDefaultMemberPermissions(0x08) // Perms admin requises
+.addStringOption(option => 
+	option.setName('channel')
+	.setDescription("Le nom du channel textuel a crée")
+	.setRequired(true)
 )
 
 ];
