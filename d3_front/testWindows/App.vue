@@ -5,81 +5,119 @@ import { ref } from "vue";
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
 const min = { w: 100, h: 100 };
-const fit = true;
+const fit = false;
+
+const x = ref(300);
+const y = ref(150);
 
 
-let activesWindows = ref([]);
-activesWindows.value.push({
-    name: "Firefox",
-    x: ref(50),
-    y: ref(200),
-    w: ref(300),
-    h: ref(200),
-    moving: ref(false),
-    fit: true,
-    icon: "Firefox_logo,_2019.svg",
-    minimized: false
-});
-
-activesWindows.value.push({
-    name : "Spotify",
-    x: ref(600),
-    y: ref(300),
-    w: ref(450),
-    h: ref(300),
-    moving: ref(false),
-    icon: "icon_spoty",
-    minimized: false
-});
-
-let minWindows = ref([
-    {
-        name: "Minecraft",
-        x: ref(600),
-        y: ref(300),
+let activesWindows = ref({});
+activesWindows.value = {
+    "Firefox": {
+        x: x,
+        y: y,
+        w: ref(300),
+        h: ref(200),
+        moving: ref(false),
+        fit: true,
+        icon: "Firefox_logo,_2019.svg",
+        minimized: false
+    },
+    "Spotify": {
+        x: 600,
+        y: 300,
         w: ref(450),
+        h: ref(300),
+        moving: ref(false),
+        icon: "icon_spoty",
+        minimized: false
+    }
+};
+
+let minWindows = ref({});
+minWindows.value = {
+    "Minecraft": {
+        x: 600,
+        y: 500,
+        w: ref(250),
         h: ref(300),
         moving: ref(false),
         icon: "minecraft-icon",
         minimized: true
     }
-]);
+};
 
+if (document.cookie) {
+    const stringCookie = JSON.parse(document.cookie);
+
+    activesWindows = stringCookie;
+}
+
+function eHandler(data, i, end) {
+    // Redéfinit les variables des objet par rapport au depl et resize
+    activesWindows.value[i].w = data.width;
+    activesWindows.value[i].h = data.height;
+    activesWindows.value[i].x = data.left;
+    activesWindows.value[i].y = data.top;
+
+    if (end) {
+        setCookies();
+    }
+}
+
+function setCookies() {
+    console.log("setCookie");
+
+    document.cookie = `"activesWindows":${JSON.stringify(activesWindows.value)}`;
+    console.log(document.cookie);
+}
 
 function log() {
     // for (const fenetres in activesWindows) {
     //     console.log(activesWindows[fenetres]);
     // }
-
-    console.log(activesWindows);
-    console.log(minWindows);
+    console.log(activesWindows.value[0].x);
+    console.log(activesWindows.value);
+    // console.log(minWindows);
 }
 
 function minimize(index) {
-    minWindows.value.push(activesWindows.value[index]);
-    activesWindows.value.splice(index, 1);
+    activesWindows.value[index].minimized = true;
+    minWindows.value[index] = activesWindows.value[index];
+    delete activesWindows.value[index];
+}
 
-    console.log(activesWindows);
+function unMinimize(index) {
+    minWindows.value[index].minimized = false;
+    activesWindows.value[index] = minWindows.value[index];
+    delete minWindows.value[index];
 }
 
 </script>
 
 <template>
-    <header>
+    <!-- <header>
         <h1>Test fenêtres déplaçables</h1>
         <button @click="log">Log</button>
-    </header>
-    <div class="page" >
+    </header> -->
+    <div class="page">
 
-        <vue-resizable v-for="(window, index) of activesWindows" :ref="setWindows"
+        <vue-resizable v-for="(window, index) of activesWindows" :key="index"
         class="default"
-        :id="window.name"
+        :id="index"
         :dragSelector="dragSelector"
         :active="handlers"
         :fit-parent="fit"
         :width="window.w" :height="window.h"
         :left="window.x" :top="window.y"
-        :min-width="min.w" :min-height="min.h">
+        :min-width="min.w" :min-height="min.h"
+        @mount="eHandler($event, index)"
+        @resize:move="eHandler($event, index)"
+        @resize:start="eHandler($event, index)"
+        @resize:end="eHandler($event, index, end=true)"
+        @drag:move="eHandler($event, index)"
+        @drag:start="eHandler($event, index)"
+        @drag:end="eHandler($event, index, end=true)">
             <div class="w-picker">
                 <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon" class="iconW">
                 <div class="buttonBar">
@@ -88,13 +126,13 @@ function minimize(index) {
                 </div>
             </div>
             
-            <div class="w-content"></div>
+            <div class="w-content"> {{ window }}</div>
         </vue-resizable> 
 
     </div>
     <div class="toolbar">
         <div class="minimContainer" v-for="(window, index) of minWindows">
-            <div class="minimApp" :id="index">
+            <div class="minimApp" :id="index" @click="unMinimize(index)">
                 <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon">
             </div>
         </div>
@@ -119,7 +157,7 @@ header {
     position: relative;
     overflow: hidden;
 
-    background: no-repeat center url("./testWindows/assets/back/Squadron\ 42\ -\ Star\ Citizen\ Screenshot\ 2022.08.08\ -\ 18.14.29.28.png") ;
+    background: no-repeat center/cover url("./testWindows/assets/back/Squadron\ 42\ -\ Star\ Citizen\ Screenshot\ 2022.08.08\ -\ 18.14.29.28.png") ;
 }
 
 .resizable {
@@ -168,10 +206,6 @@ header {
     padding: 3px;
 }
 
-.toolbar {
-    height: 7%;
-    background-color: lightslategray;
-}
 
 .buttonBar {
     display: flex;
@@ -210,6 +244,8 @@ header {
 .toolbar {
     display: flex;
     justify-content: center;
+    height: 5vh;
+    background-color: lightslategray;
 }
 
 .minimContainer {
@@ -221,7 +257,7 @@ header {
     height: 92%;
     display: flex;
     align-items: center;
-    padding: 0 2vh;
+    padding: 0 1.6vh;
     margin-bottom: -4px;
     background-color: rgba(255, 255, 255, 0.1);
     border-bottom: 2px solid cyan;
