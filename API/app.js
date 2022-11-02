@@ -13,8 +13,8 @@ connect("mongodb://localhost:27017/", (err) => {
     console.log("Erreur lors de la connexion à la base de données");
     process.exit(-1);
   } else {
-    console.log("Connexion avec la base de données établie");
+    console.log("*********************************Connexion avec la base de données établie*********************************");
     app.listen(3000);
-    console.log("Attente des requêtes au port 3OOO");
+    console.log("*************************************Attente des requêtes au port 3OOO*************************************");
   }
 });
