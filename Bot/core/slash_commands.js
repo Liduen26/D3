@@ -74,6 +74,17 @@ new SlashCommandBuilder()
 	.setDescription('Channel a supprimer')
 	.addChannelTypes(ChannelType.GuildText)
 	.setRequired(true)
+),
+
+new SlashCommandBuilder()
+.setName("joinvoicechannel")
+.setDescription("faire rejoindre un channel vocal au bot")
+.addChannelOption(option => 
+	option
+	.setName('channel')
+	.setDescription('Channel a rejoindre')
+	.addChannelTypes(ChannelType.GuildVoice)
+	.setRequired(true)
 )
 
 ];

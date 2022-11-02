@@ -12,4 +12,5 @@ module.exports = (Client, interaction) => {
         buttons_tab[interaction.customId](Client,interaction);
         return;
     }
+
 }
