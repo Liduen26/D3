@@ -3,6 +3,7 @@
 *.mp3
 bot.zip
 .env
+test.txt
 
 # Exceptions 
 !assets/sounds/*
