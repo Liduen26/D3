@@ -1,6 +1,9 @@
 <script setup>
 import VueResizable from 'vue-resizable';
 import { onMounted, ref } from "vue";
+import AdminWindowVue from './views/AdminWindow.vue';
+
+
 
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
@@ -20,7 +23,9 @@ activesWindows.value = {
         moving: false,
         fit: true,
         icon: "Firefox_logo,_2019.svg",
-        minimized: false
+        minimized: false,
+        content : AdminWindowVue
+
     },
     "Spotify": {
         x: 600,
@@ -170,7 +175,7 @@ function unMinimize(index) {
                 </div>
             </div>
             
-            <div class="w-content"><pre> {{ window }}</pre></div>
+            <div class="w-content">{{window.content}} </div>
         </vue-resizable> 
 
     </div>
