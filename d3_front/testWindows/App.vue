@@ -10,6 +10,8 @@ const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
 const min = { w: 100, h: 100 };
 const fit = false;
 
+let focusWindow = ref("");
+
 
 let activesWindows = ref({});
 activesWindows.name = "activesWindows"
@@ -57,7 +59,7 @@ minWindows.value = {
 // Juste avant l'affichage
 onMounted(() => {
 
-    // Si le localStorage.activesWindows contient qqchose
+    // Si localStorage.activesWindows contient qqchose
     if (localStorage.activesWindows) {
         const data = JSON.parse(localStorage.activesWindows);
         activesWindows.value = {};
@@ -69,17 +71,14 @@ onMounted(() => {
     }
     
     
-    // Si le localStorage.activesWindows contient qqchose
+    // Si localStorage.minWindows contient qqchose
     if (localStorage.minWindows) {
         const data = JSON.parse(localStorage.minWindows);
         minWindows.value = {};
-        console.log(data);
 
         // Boucle pour remplir le tableau des fenêtres actives à partir des datas dans les cookies
         for (const window in data) {
-            console.log(window);
             minWindows.value[window] = data[window];
-            console.log(minWindows);
         }
     }
 })
@@ -102,10 +101,7 @@ function eHandler(data, i, end) {
  * @param {object} payload 
  */
 function setStorage(params) {
-    console.log(params.value);
     localStorage.setItem(params.name, JSON.stringify(params.value));
-
-    console.log(localStorage);
 
     return true;
 }
@@ -141,6 +137,10 @@ function unMinimize(index) {
     setStorage(activesWindows);
 }
 
+function selectWindow(index) {
+    focusWindow.value = index;
+}
+
 </script>
 
 <template>
@@ -152,15 +152,13 @@ function unMinimize(index) {
     <div class="page">
 
         <vue-resizable v-for="(window, index) of activesWindows" :key="index"
-        class="default"
-        :id="index"
-        :dragSelector="dragSelector"
-        :active="handlers"
-        :fit-parent="fit"
+        :id="index" :class="(index === focusWindow) ? 'foreground' : ''" class="default"
+        :dragSelector="dragSelector" :active="handlers" :fit-parent="fit"
         :width="window.w" :height="window.h"
         :left="window.x" :top="window.y"
         :min-width="min.w" :min-height="min.h"
         @mount="eHandler($event, index)"
+        @mousedown="selectWindow(index)"
         @resize:move="eHandler($event, index)"
         @resize:start="eHandler($event, index)"
         @resize:end="eHandler($event, index, end=true)"
@@ -287,6 +285,9 @@ header {
     padding-left: 3px;
 }
 
+.foreground {
+    z-index: 2;
+}
 
 /* Toolbar */
 
@@ -322,4 +323,6 @@ header {
 .minimApp img {
     height: 60%;
 }
+
+
 </style>
