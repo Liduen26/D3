@@ -1,24 +1,23 @@
 <script setup>
 import VueResizable from 'vue-resizable';
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
 const min = { w: 100, h: 100 };
 const fit = false;
 
-const x = ref(300);
-const y = ref(150);
-
 
 let activesWindows = ref({});
+activesWindows.name = "activesWindows"
 activesWindows.value = {
     "Firefox": {
-        x: x,
-        y: y,
-        w: ref(300),
-        h: ref(200),
-        moving: ref(false),
+        x: 300,
+        y: 150,
+        z: 0,
+        w: 300,
+        h: 200,
+        moving: false,
         fit: true,
         icon: "Firefox_logo,_2019.svg",
         minimized: false
@@ -26,32 +25,60 @@ activesWindows.value = {
     "Spotify": {
         x: 600,
         y: 300,
-        w: ref(450),
-        h: ref(300),
-        moving: ref(false),
+        z: 0,
+        w: 450,
+        h: 300,
+        moving: false,
         icon: "icon_spoty",
         minimized: false
     }
 };
 
 let minWindows = ref({});
+minWindows.name = "minWindows";
 minWindows.value = {
     "Minecraft": {
         x: 600,
         y: 500,
-        w: ref(250),
-        h: ref(300),
-        moving: ref(false),
+        z: 0,
+        w: 250,
+        h: 300,
+        moving: false,
         icon: "minecraft-icon",
         minimized: true
     }
 };
 
-if (document.cookie) {
-    const stringCookie = JSON.parse(document.cookie);
+// Juste avant l'affichage
+onMounted(() => {
 
-    activesWindows = stringCookie;
-}
+    // Si le localStorage.activesWindows contient qqchose
+    if (localStorage.activesWindows) {
+        const data = JSON.parse(localStorage.activesWindows);
+        activesWindows.value = {};
+        
+        // Boucle pour remplir le tableau des fenêtres actives à partir des datas dans les cookies
+        for (const window in data) {
+            activesWindows.value[window] = data[window];
+        }
+    }
+    
+    
+    // Si le localStorage.activesWindows contient qqchose
+    if (localStorage.minWindows) {
+        const data = JSON.parse(localStorage.minWindows);
+        minWindows.value = {};
+        console.log(data);
+
+        // Boucle pour remplir le tableau des fenêtres actives à partir des datas dans les cookies
+        for (const window in data) {
+            console.log(window);
+            minWindows.value[window] = data[window];
+            console.log(minWindows);
+        }
+    }
+})
+
 
 function eHandler(data, i, end) {
     // Redéfinit les variables des objet par rapport au depl et resize
@@ -61,22 +88,32 @@ function eHandler(data, i, end) {
     activesWindows.value[i].y = data.top;
 
     if (end) {
-        setCookies();
+        setStorage(activesWindows);
     }
 }
 
-function setCookies() {
-    console.log("setCookie");
+/**
+ * Prends en argument le tableau qu'on veut stocker (Pas de .value en cas de ref !)
+ * @param {object} payload 
+ */
+function setStorage(params) {
+    console.log(params.value);
+    localStorage.setItem(params.name, JSON.stringify(params.value));
 
-    document.cookie = `"activesWindows":${JSON.stringify(activesWindows.value)}`;
-    console.log(document.cookie);
+    console.log(localStorage);
+
+    return true;
+}
+
+function clearStorage() {
+    localStorage.clear();
+    console.log(localStorage);
 }
 
 function log() {
     // for (const fenetres in activesWindows) {
     //     console.log(activesWindows[fenetres]);
     // }
-    console.log(activesWindows.value[0].x);
     console.log(activesWindows.value);
     // console.log(minWindows);
 }
@@ -85,21 +122,28 @@ function minimize(index) {
     activesWindows.value[index].minimized = true;
     minWindows.value[index] = activesWindows.value[index];
     delete activesWindows.value[index];
+
+    setStorage(minWindows);
+    setStorage(activesWindows);
 }
 
 function unMinimize(index) {
     minWindows.value[index].minimized = false;
     activesWindows.value[index] = minWindows.value[index];
     delete minWindows.value[index];
+
+    setStorage(minWindows);
+    setStorage(activesWindows);
 }
 
 </script>
 
 <template>
-    <!-- <header>
+    <header>
         <h1>Test fenêtres déplaçables</h1>
         <button @click="log">Log</button>
-    </header> -->
+        <button @click="clearStorage">Clear</button>
+    </header>
     <div class="page">
 
         <vue-resizable v-for="(window, index) of activesWindows" :key="index"
@@ -126,7 +170,7 @@ function unMinimize(index) {
                 </div>
             </div>
             
-            <div class="w-content"> {{ window }}</div>
+            <div class="w-content"><pre> {{ window }}</pre></div>
         </vue-resizable> 
 
     </div>
