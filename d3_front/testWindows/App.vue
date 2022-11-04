@@ -5,7 +5,7 @@ import { onMounted, ref } from "vue";
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
 const min = { w: 100, h: 100 };
-const fit = false;
+let placer = ref(false);
 
 let focusWindow = ref("");
 
@@ -16,23 +16,18 @@ activesWindows.value = {
     "Firefox": {
         x: 300,
         y: 150,
-        z: 0,
         w: 300,
         h: 200,
-        moving: false,
-        fit: true,
         icon: "Firefox_logo,_2019.svg",
-        minimized: false
+        moving: false,
     },
     "Spotify": {
         x: 600,
         y: 300,
-        z: 0,
         w: 450,
         h: 300,
-        moving: false,
         icon: "icon_spoty",
-        minimized: false
+        moving: false,
     }
 };
 
@@ -42,12 +37,10 @@ minWindows.value = {
     "Minecraft": {
         x: 600,
         y: 500,
-        z: 0,
         w: 250,
         h: 300,
-        moving: false,
         icon: "minecraft-icon",
-        minimized: true
+        moving: false,
     }
 };
 
@@ -78,8 +71,13 @@ onMounted(() => {
     }
 })
 
-
-function eHandler(data, i, end) {
+/**
+ * Gère les évents et la prise en compte des données au déplacement et resize
+ * @param {*} data event du DOM
+ * @param {*} i index du tableau
+ * @param {boolean} end Est-ce que c'est la fin d'une action ? (pour la save)
+ */
+function eHandler(data, i, end, moving) {
     // Redéfinit les variables des objet par rapport au depl et resize
     activesWindows.value[i].w = data.width;
     activesWindows.value[i].h = data.height;
@@ -87,7 +85,27 @@ function eHandler(data, i, end) {
     activesWindows.value[i].y = data.top;
 
     if (end) {
+        activesWindows.value[i].moving = false;
         setStorage(activesWindows);
+    }
+
+    if (moving) {
+        activesWindows.value[i].moving = true;
+
+        // Affichage du placer
+        if (placer.value) {
+            const divPlacer = document.querySelector("#w-placer");
+
+            divPlacer.style.left = data.left + 'px';
+            divPlacer.style.top = data.top + 'px';
+            divPlacer.style.width = data.width + 'px';
+            divPlacer.style.height = data.height + 'px';
+            console.log(divPlacer);
+
+            divPlacer.classList.add("placer-maximized");
+
+            // Va falloir faire du SCSS pour avoir une classe qui s'adapte 
+        }
     }
 }
 
@@ -101,21 +119,26 @@ function setStorage(params) {
     return true;
 }
 
-function clearStorage() {
-    localStorage.clear();
-    console.log(localStorage);
-}
-
 function log() {
     // for (const fenetres in activesWindows) {
     //     console.log(activesWindows[fenetres]);
     // }
     console.log(activesWindows.value);
+    console.log(focusWindow);
     // console.log(minWindows);
 }
 
+function clearStorage() {
+    localStorage.clear();
+    console.log(localStorage);
+}
+
+/**
+ * Envoie la fenêtre dans la barre des tâches
+ * @param {*} index 
+ */
 function minimize(index) {
-    activesWindows.value[index].minimized = true;
+    console.log("slt");
     minWindows.value[index] = activesWindows.value[index];
     delete activesWindows.value[index];
 
@@ -123,8 +146,11 @@ function minimize(index) {
     setStorage(activesWindows);
 }
 
+/**
+ * Sors la fenêtre de la barre des tâches et l'affiche
+ * @param {*} index 
+ */
 function unMinimize(index) {
-    minWindows.value[index].minimized = false;
     activesWindows.value[index] = minWindows.value[index];
     delete minWindows.value[index];
 
@@ -132,10 +158,31 @@ function unMinimize(index) {
     setStorage(activesWindows);
 }
 
-function selectWindow(index) {
+function selectWindow(e, index) {
     focusWindow.value = index;
 }
 
+
+function upscale(side, reset) {
+    console.log("heyyy");
+
+    placer.value = reset ? false : true;
+    console.log(placer.value);
+
+    switch (side) {
+        case "top":
+            
+            break;
+        case "left":
+            
+            break;
+        case "right":
+            
+            break;
+        default:
+            break;
+    }
+}
 </script>
 
 <template>
@@ -145,21 +192,27 @@ function selectWindow(index) {
         <button @click="clearStorage">Clear</button>
     </header>
     <div class="page">
+        <div class="upscale top" @mouseenter="upscale('top')" @mouseleave="upscale('top', reset = true)"></div>
+        <div class="upscale left" @mouseenter="upscale('left')" @mouseleave="upscale('left', reset = true)"></div>
+        <div class="upscale right" @mouseenter="upscale('right')" @mouseleave="upscale('right', reset = true)"></div>
+
+        <div id="w-placer"></div>
 
         <vue-resizable v-for="(window, index) of activesWindows" :key="index"
-        :id="index" :class="(index === focusWindow) ? 'foreground' : ''" class="default"
-        :dragSelector="dragSelector" :active="handlers" :fit-parent="fit"
+        :id="index" class="default"
+        :class="[(index === focusWindow) ? 'foreground-w' : 'background-w', window.moving ? 'moving' : '']" 
+        :dragSelector="dragSelector" :active="handlers" :fit-parent="false"
         :width="window.w" :height="window.h"
         :left="window.x" :top="window.y"
         :min-width="min.w" :min-height="min.h"
         @mount="eHandler($event, index)"
-        @mousedown="selectWindow(index)"
-        @resize:move="eHandler($event, index)"
-        @resize:start="eHandler($event, index)"
-        @resize:end="eHandler($event, index, end=true)"
-        @drag:move="eHandler($event, index)"
-        @drag:start="eHandler($event, index)"
-        @drag:end="eHandler($event, index, end=true)">
+        @mousedown="selectWindow($event, index)"
+        @resize:start="eHandler($event, index, false)"
+        @resize:move="eHandler($event, index, false, moving = true)"
+        @resize:end="eHandler($event, index, end = true)"
+        @drag:start="eHandler($event, index, false)"
+        @drag:move="eHandler($event, index, false, moving = true)"
+        @drag:end="eHandler($event, index, end = true)">
             <div class="w-picker">
                 <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon" class="iconW">
                 <div class="buttonBar">
@@ -168,7 +221,7 @@ function selectWindow(index) {
                 </div>
             </div>
             
-            <div class="w-content"><pre> {{ window }}</pre></div>
+            <div class="w-content"><pre>{{ window }}</pre></div>
         </vue-resizable> 
 
     </div>
@@ -181,7 +234,7 @@ function selectWindow(index) {
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 /* Mise en page */
 header {
     display: flex;
@@ -200,6 +253,35 @@ header {
     overflow: hidden;
 
     background: no-repeat center/cover url("./testWindows/assets/back/Squadron\ 42\ -\ Star\ Citizen\ Screenshot\ 2022.08.08\ -\ 18.14.29.28.png") ;
+    perspective: 1em;
+
+
+    .upscale {
+        position: absolute;
+        
+
+    }
+    .upscale.top {
+        background-color: rgba(255, 0, 0, 0.4);
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 5%;
+    } 
+    .upscale.left {
+        background-color: rgba(0, 157, 255, 0.4);
+        left: 0;
+        top: 0;
+        width: 3%;
+        height: 100%;
+    }
+    .upscale.right {
+        background-color: rgba(0, 157, 255, 0.4);
+        right: 0;
+        top: 0;
+        width: 3%;
+        height: 100%;
+    }
 }
 
 .resizable {
@@ -239,7 +321,6 @@ header {
 
 .w-picker {
     background-color: gray;
-    cursor: move;
     border-radius: 10px;
     display: flex;
     justify-content: space-between;
@@ -280,8 +361,39 @@ header {
     padding-left: 3px;
 }
 
-.foreground {
+.foreground-w {
     z-index: 2;
+}
+.background-w {
+    z-index: 1;
+}
+
+.moving {
+    pointer-events: none;
+}
+
+
+/* Placer */
+
+#w-placer {
+    // transition: ;
+    pointer-events: none;
+    position: absolute;
+
+    background-color: red;
+
+    
+}
+
+.placer-maximized {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.placer {
+
 }
 
 /* Toolbar */
