@@ -5,9 +5,16 @@ import { onMounted, ref } from "vue";
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
 const min = { w: 100, h: 100 };
-let placer = ref(false);
+let placer = ref({state: false, place: ""});
 
 let focusWindow = ref("");
+
+let replaceCo = ref({x: 0, y: 0});
+
+// const page = document.querySelector(".page");
+// const pageRect = page.getBoundingClientRect();
+
+// let screen = ref({width: pageRect.width, height: pageRect.height});
 
 
 let activesWindows = ref({});
@@ -18,6 +25,10 @@ activesWindows.value = {
         y: 150,
         w: 300,
         h: 200,
+        max: {
+            state: false,
+            side: ""
+        },
         icon: "Firefox_logo,_2019.svg",
         moving: false,
     },
@@ -26,6 +37,10 @@ activesWindows.value = {
         y: 300,
         w: 450,
         h: 300,
+        max: {
+            state: false,
+            side: ""
+        },
         icon: "icon_spoty",
         moving: false,
     }
@@ -51,6 +66,7 @@ onMounted(() => {
     if (localStorage.activesWindows) {
         const data = JSON.parse(localStorage.activesWindows);
         activesWindows.value = {};
+        console.log(data);
         
         // Boucle pour remplir le tableau des fenêtres actives à partir des datas dans les cookies
         for (const window in data) {
@@ -69,6 +85,10 @@ onMounted(() => {
             minWindows.value[window] = data[window];
         }
     }
+
+    if (localStorage.focusWindow) {
+        focusWindow.value = localStorage.focusWindow;
+    }
 })
 
 /**
@@ -84,47 +104,68 @@ function eHandler(data, i, end, moving) {
     activesWindows.value[i].x = data.left;
     activesWindows.value[i].y = data.top;
 
-    if (end) {
-        activesWindows.value[i].moving = false;
-        setStorage(activesWindows);
+
+    const appBar = document.querySelector(`#${i} .w-picker`);
+    
+    function mousemove(e) {
+        console.log(e);
     }
 
+    if (end) {
+        activesWindows.value[i].moving = false;
+        delete placer.value.app;
+        saveState();
+
+        appBar.removeEventListener("mousemove", mousemove);
+    }
+    
     if (moving) {
+        appBar.addEventListener("mousemove", mousemove);
         activesWindows.value[i].moving = true;
+        placer.value.app = i;
+    
+        if (activesWindows.value[i].max.state) {
+            activesWindows.value[i].max.state = false;
 
-        // Affichage du placer
-        if (placer.value) {
-            const divPlacer = document.querySelector("#w-placer");
+            const page = document.querySelector(".page");
+            const pageRect = page.getBoundingClientRect();
 
-            divPlacer.style.left = data.left + 'px';
-            divPlacer.style.top = data.top + 'px';
-            divPlacer.style.width = data.width + 'px';
-            divPlacer.style.height = data.height + 'px';
-            console.log(divPlacer);
-
-            divPlacer.classList.add("placer-maximized");
-
-            // Va falloir faire du SCSS pour avoir une classe qui s'adapte 
+            
+            // Déplacer la fenêtre sur les coordonées de la souris 
+            activesWindows.value[i].x = replaceCo.value.x - (data.width / 2);
+            activesWindows.value[i].y = replaceCo.value.y - 10 - pageRect.top;
         }
+        
     }
 }
 
-/**
- * Prends en argument le tableau qu'on veut stocker (Pas de .value en cas de ref !)
- * @param {object} payload 
- */
-function setStorage(params) {
-    localStorage.setItem(params.name, JSON.stringify(params.value));
+function setReplaceCo(e) {
+    replaceCo.value.x = e.x;
+    replaceCo.value.y = e.y;
+}
 
-    return true;
+
+/**
+ * Sauvegarde l'état du système, les tableaux de fenètres actives et minimisées, et la fenêtre en focus
+ */
+function saveState() {
+    localStorage.setItem("activesWindows", JSON.stringify(activesWindows.value));
+    localStorage.setItem("minWindows", JSON.stringify(minWindows.value));
+    
+    localStorage.setItem("focusWindow", focusWindow.value);
+
+    const page = document.querySelector(".page");
+    const pageRect = page.getBoundingClientRect();
+
+    localStorage.setItem("screen", JSON.stringify({width: pageRect.width, height: pageRect.height}))
 }
 
 function log() {
     // for (const fenetres in activesWindows) {
     //     console.log(activesWindows[fenetres]);
     // }
-    console.log(activesWindows.value);
-    console.log(focusWindow);
+    console.log(localStorage);
+    console.log(focusWindow.value);
     // console.log(minWindows);
 }
 
@@ -142,8 +183,7 @@ function minimize(index) {
     minWindows.value[index] = activesWindows.value[index];
     delete activesWindows.value[index];
 
-    setStorage(minWindows);
-    setStorage(activesWindows);
+    saveState();
 }
 
 /**
@@ -154,8 +194,7 @@ function unMinimize(index) {
     activesWindows.value[index] = minWindows.value[index];
     delete minWindows.value[index];
 
-    setStorage(minWindows);
-    setStorage(activesWindows);
+    saveState();
 }
 
 function selectWindow(e, index) {
@@ -164,24 +203,77 @@ function selectWindow(e, index) {
 
 
 function upscale(side, reset) {
-    console.log("heyyy");
+    placer.value.state = reset ? false : true;
+    placer.value.place = side;
+    let i;
 
-    placer.value = reset ? false : true;
-    console.log(placer.value);
-
-    switch (side) {
-        case "top":
-            
-            break;
-        case "left":
-            
-            break;
-        case "right":
-            
-            break;
-        default:
-            break;
+    if (placer.value.app) {
+        i = placer.value.app;
     }
+
+    if (reset) {
+        const divPlacer = document.querySelector(`.w-placer.${placer.value.place}`);
+        divPlacer.classList.remove("placer-visible");
+        divPlacer.classList.remove("placer-maximized");
+        divPlacer.classList.remove("placer-half-left");
+        divPlacer.classList.remove("placer-half-right");
+    } else if (i) {
+        
+        // Gestion de la div transparente qui montre où va être l'app
+        const divPlacer = document.querySelector(`.w-placer.${placer.value.place}`);
+        const app = document.querySelector(`#${i}`);
+
+        divPlacer.classList.add("placer-visible");
+
+        if (placer.value.place === "top") {
+            divPlacer.classList.add("placer-maximized");
+            
+        } else if(placer.value.place === "left" || placer.value.place === "right") {
+            divPlacer.classList.add(`placer-half-${placer.value.place}`);
+        }
+        
+        
+        const zonePlacer = document.querySelector(`.upscale.${placer.value.place}`);
+        zonePlacer.addEventListener("mouseup", mouseup);
+        zonePlacer.addEventListener("mouseleave", mouseleave)
+
+        // Quand on lache le clic / Gestion de l'agrandissement réel de l'app
+        function mouseup() {
+            console.log("salut !", app);
+
+            activesWindows.value[i].max.state = true;
+            activesWindows.value[i].max.side = side;
+
+            saveState();
+            
+            zonePlacer.removeEventListener("mouseup", mouseup);
+            zonePlacer.removeEventListener("mouseleave", mouseleave);
+        }
+
+        // Pour enlever les event listeners
+        function mouseleave() {
+            zonePlacer.removeEventListener("mouseleave", mouseleave);
+            zonePlacer.removeEventListener("mouseup", mouseup);
+        }
+    }
+}
+
+/**
+ * Retourne les coordonnées d'une div par rapport à une autre
+ * @param targP La div dont on veut les coordonnées
+ * @param section Le référentiel
+ */
+function getRect(targP, section) {
+    let offset = [];
+
+    let divRect = section.getBoundingClientRect();
+    let elemRect = targP.getBoundingClientRect();
+    offset.left = (elemRect.left - divRect.left) + section.scrollLeft;
+    offset.top = (elemRect.top - divRect.top) + section.scrollTop;
+    offset.width = elemRect.width;
+    offset.height = elemRect.height;
+
+    return offset;
 }
 </script>
 
@@ -196,11 +288,13 @@ function upscale(side, reset) {
         <div class="upscale left" @mouseenter="upscale('left')" @mouseleave="upscale('left', reset = true)"></div>
         <div class="upscale right" @mouseenter="upscale('right')" @mouseleave="upscale('right', reset = true)"></div>
 
-        <div id="w-placer"></div>
+        <div class="w-placer top"></div>
+        <div class="w-placer left"></div>
+        <div class="w-placer right"></div>
 
         <vue-resizable v-for="(window, index) of activesWindows" :key="index"
         :id="index" class="default"
-        :class="[(index === focusWindow) ? 'foreground-w' : 'background-w', window.moving ? 'moving' : '']" 
+        :class="[(index === focusWindow) ? 'foreground-w' : 'background-w', window.moving ? 'moving' : '', window.max.state ? (window.max.side === 'top') ? 'max-top' : '' : '', window.max.state ? (window.max.side === 'left') ? 'max-left' : '' : '', window.max.state ? (window.max.side === 'right') ? 'max-right' : '' : '']"        
         :dragSelector="dragSelector" :active="handlers" :fit-parent="false"
         :width="window.w" :height="window.h"
         :left="window.x" :top="window.y"
@@ -213,7 +307,7 @@ function upscale(side, reset) {
         @drag:start="eHandler($event, index, false)"
         @drag:move="eHandler($event, index, false, moving = true)"
         @drag:end="eHandler($event, index, end = true)">
-            <div class="w-picker">
+            <div class="w-picker" @mousedown="setReplaceCo">
                 <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon" class="iconW">
                 <div class="buttonBar">
                     <button class="minimizeW" @click="minimize(index)">-</button>
@@ -253,7 +347,6 @@ header {
     overflow: hidden;
 
     background: no-repeat center/cover url("./testWindows/assets/back/Squadron\ 42\ -\ Star\ Citizen\ Screenshot\ 2022.08.08\ -\ 18.14.29.28.png") ;
-    perspective: 1em;
 
 
     .upscale {
@@ -375,25 +468,79 @@ header {
 
 /* Placer */
 
-#w-placer {
-    // transition: ;
+.w-placer {
     pointer-events: none;
     position: absolute;
 
-    background-color: red;
-
+    background-color: rgba(255, 255, 255, 0.2);
+    box-sizing: border-box;
+    border: 10px solid rgba(0, 0, 0, 0.4);
     
+    visibility: collapse;
+    opacity: 0%;
+    transition: all .5s;
+
+    &.top {
+        left: 50%;
+        top: 0%;
+        width: 0%;
+        height: 0%;
+    }
+    &.left {
+        left: 0%;
+        top: 50%;
+        width: 0%;
+        height: 0%;
+    }
+    &.right {
+        left: 100%;
+        top: 50%;
+        width: 0%;
+        height: 0%;
+    }
+    
+    &.placer-visible {
+        visibility: visible;
+        opacity: 100%;
+    }
+    
+    &.placer-maximized {
+        left: 0%;
+        top: 0%;
+        width: 100%;
+        height: 100%;
+    }
+    &.placer-half-left {
+        left: 0%;
+        top: 0%;
+        width: 50%;
+        height: 100%;
+    }
+    &.placer-half-right {
+        left: 50%;
+        top: 0%;
+        width: 50%;
+        height: 100%;
+    }
 }
 
-.placer-maximized {
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
+.max-top {
+    left: 0% !important;
+    top: 0% !important;
+    width: 100% !important;
+    height: 100% !important;
 }
-
-.placer {
-
+.max-left {
+    left: 0% !important;
+    top: 0% !important;
+    width: 50% !important;
+    height: 100% !important;
+}
+.max-right {
+    left: 50% !important;
+    top: 0% !important;
+    width: 50% !important;
+    height: 100% !important;
 }
 
 /* Toolbar */
