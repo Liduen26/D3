@@ -31,6 +31,11 @@ activesWindows.value = {
         },
         icon: "Firefox_logo,_2019.svg",
         moving: false,
+        minSize: {
+            x: false, // false si désactivé (qd même 100x100px)
+            y: false
+        },
+        barColor: false
     },
     "Spotify": {
         x: 600,
@@ -43,6 +48,11 @@ activesWindows.value = {
         },
         icon: "icon_spoty",
         moving: false,
+        minSize: {
+            x: false,
+            y: false
+        },
+        barColor: false
     }
 };
 
@@ -54,8 +64,17 @@ minWindows.value = {
         y: 500,
         w: 250,
         h: 300,
+        max: {
+            state: false,
+            side: ""
+        },
         icon: "minecraft-icon",
         moving: false,
+        minSize: {
+            x: false,
+            y: false
+        },
+        barColor: false
     }
 };
 
@@ -106,21 +125,14 @@ function eHandler(data, i, end, moving) {
 
 
     const appBar = document.querySelector(`#${i} .w-picker`);
-    
-    function mousemove(e) {
-        console.log(e);
-    }
 
     if (end) {
         activesWindows.value[i].moving = false;
         delete placer.value.app;
         saveState();
-
-        appBar.removeEventListener("mousemove", mousemove);
     }
     
     if (moving) {
-        appBar.addEventListener("mousemove", mousemove);
         activesWindows.value[i].moving = true;
         placer.value.app = i;
     
@@ -193,11 +205,11 @@ function minimize(index) {
 function unMinimize(index) {
     activesWindows.value[index] = minWindows.value[index];
     delete minWindows.value[index];
-
+    selectWindow(index)
     saveState();
 }
 
-function selectWindow(e, index) {
+function selectWindow(index) {
     focusWindow.value = index;
 }
 
@@ -218,6 +230,7 @@ function upscale(side, reset) {
         divPlacer.classList.remove("placer-half-left");
         divPlacer.classList.remove("placer-half-right");
     } else if (i) {
+        console.log(i);
         
         // Gestion de la div transparente qui montre où va être l'app
         const divPlacer = document.querySelector(`.w-placer.${placer.value.place}`);
@@ -241,10 +254,7 @@ function upscale(side, reset) {
         function mouseup() {
             console.log("salut !", app);
 
-            activesWindows.value[i].max.state = true;
-            activesWindows.value[i].max.side = side;
-
-            saveState();
+            scale(i, side);
             
             zonePlacer.removeEventListener("mouseup", mouseup);
             zonePlacer.removeEventListener("mouseleave", mouseleave);
@@ -256,6 +266,13 @@ function upscale(side, reset) {
             zonePlacer.removeEventListener("mouseup", mouseup);
         }
     }
+}
+
+function scale(i, side) {
+    activesWindows.value[i].max.state = true;
+    activesWindows.value[i].max.side = side;
+
+    saveState();
 }
 
 /**
@@ -279,7 +296,7 @@ function getRect(targP, section) {
 
 <template>
     <header>
-        <h1>Test fenêtres déplaçables</h1>
+        <h3>Test fenêtres déplaçables</h3>
         <button @click="log">Log</button>
         <button @click="clearStorage">Clear</button>
     </header>
@@ -294,20 +311,26 @@ function getRect(targP, section) {
 
         <vue-resizable v-for="(window, index) of activesWindows" :key="index"
         :id="index" class="default"
-        :class="[(index === focusWindow) ? 'foreground-w' : 'background-w', window.moving ? 'moving' : '', window.max.state ? (window.max.side === 'top') ? 'max-top' : '' : '', window.max.state ? (window.max.side === 'left') ? 'max-left' : '' : '', window.max.state ? (window.max.side === 'right') ? 'max-right' : '' : '']"        
+        :class="[(index === focusWindow) ? 'foreground-w' : 'background-w', 
+        window.moving ? 'moving' : '', 
+        window.max.state ? (window.max.side === 'top') ? 'max-top' : '' : '', 
+        window.max.state ? (window.max.side === 'left') ? 'max-left' : '' : '', 
+        window.max.state ? (window.max.side === 'right') ? 'max-right' : '' : '']"  
         :dragSelector="dragSelector" :active="handlers" :fit-parent="false"
         :width="window.w" :height="window.h"
         :left="window.x" :top="window.y"
-        :min-width="min.w" :min-height="min.h"
+        :min-width="(window.minSize.x) ? window.minSize.x : min.w" :min-height="(window.minSize.y) ? window.minSize.y : min.h"
         @mount="eHandler($event, index)"
-        @mousedown="selectWindow($event, index)"
+        @mousedown="selectWindow(index)"
+        @dblclick="scale(index, 'top')"
         @resize:start="eHandler($event, index, false)"
         @resize:move="eHandler($event, index, false, moving = true)"
         @resize:end="eHandler($event, index, end = true)"
         @drag:start="eHandler($event, index, false)"
         @drag:move="eHandler($event, index, false, moving = true)"
         @drag:end="eHandler($event, index, end = true)">
-            <div class="w-picker" @mousedown="setReplaceCo">
+            <div class="w-picker" @mousedown="setReplaceCo"
+            :style="window.barColor ? `background-color: ${window.barColor}` : ''">
                 <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon" class="iconW">
                 <div class="buttonBar">
                     <button class="minimizeW" @click="minimize(index)">-</button>
@@ -335,7 +358,7 @@ header {
     justify-content: center;
     
     border-bottom: 2px solid black;
-    height: 10%;
+    height: 5%;
 }
 
 .page {
@@ -355,21 +378,21 @@ header {
 
     }
     .upscale.top {
-        background-color: rgba(255, 0, 0, 0.4);
+        // background-color: rgba(255, 0, 0, 0.4);
         left: 0;
         top: 0;
         width: 100%;
         height: 5%;
     } 
     .upscale.left {
-        background-color: rgba(0, 157, 255, 0.4);
+        // background-color: rgba(0, 157, 255, 0.4);
         left: 0;
         top: 0;
         width: 3%;
         height: 100%;
     }
     .upscale.right {
-        background-color: rgba(0, 157, 255, 0.4);
+        // background-color: rgba(0, 157, 255, 0.4);
         right: 0;
         top: 0;
         width: 3%;
@@ -387,10 +410,6 @@ header {
     font-weight: normal;
     color: #ffffff;
     position: relative;
-}
-
-#Firefox {
-    z-index: 2;
 }
 
 /* Style Fenètres déplacables */
