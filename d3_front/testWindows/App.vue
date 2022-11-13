@@ -7,8 +7,6 @@ const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
 const min = { w: 100, h: 100 };
 let placer = ref({state: false, place: ""});
 
-let focusWindow = ref("");
-
 let replaceCo = ref({x: 0, y: 0});
 
 // const page = document.querySelector(".page");
@@ -35,7 +33,8 @@ activesWindows.value = {
             x: false, // false si désactivé (qd même 100x100px)
             y: false
         },
-        barColor: false
+        barColor: '#000',
+        textColor: 'rgb(255, 72, 0)'
     },
     "Spotify": {
         x: 600,
@@ -52,7 +51,8 @@ activesWindows.value = {
             x: false,
             y: false
         },
-        barColor: false
+        barColor: false,
+        textColor: false
     }
 };
 
@@ -74,7 +74,8 @@ minWindows.value = {
             x: false,
             y: false
         },
-        barColor: false
+        barColor: false,
+        textColor: false
     }
 };
 
@@ -164,8 +165,6 @@ function saveState() {
     localStorage.setItem("activesWindows", JSON.stringify(activesWindows.value));
     localStorage.setItem("minWindows", JSON.stringify(minWindows.value));
     
-    localStorage.setItem("focusWindow", focusWindow.value);
-
     const page = document.querySelector(".page");
     const pageRect = page.getBoundingClientRect();
 
@@ -194,7 +193,6 @@ function minimize(index) {
     console.log("slt");
     minWindows.value[index] = activesWindows.value[index];
     delete activesWindows.value[index];
-
     saveState();
 }
 
@@ -206,11 +204,13 @@ function unMinimize(index) {
     activesWindows.value[index] = minWindows.value[index];
     delete minWindows.value[index];
     selectWindow(index)
-    saveState();
 }
 
 function selectWindow(index) {
-    focusWindow.value = index;
+    let obj = activesWindows.value[index];
+    delete activesWindows.value[index];
+    activesWindows.value[index] = obj;
+    saveState();
 }
 
 
@@ -271,8 +271,6 @@ function upscale(side, reset) {
 function scale(i, side) {
     activesWindows.value[i].max.state = true;
     activesWindows.value[i].max.side = side;
-
-    saveState();
 }
 
 /**
@@ -310,9 +308,8 @@ function getRect(targP, section) {
         <div class="w-placer right"></div>
 
         <vue-resizable v-for="(window, index) of activesWindows" :key="index"
-        :id="index" class="default"
-        :class="[(index === focusWindow) ? 'foreground-w' : 'background-w', 
-        window.moving ? 'moving' : '', 
+        :id="index" class="app"
+        :class="[window.moving ? 'moving' : '', 
         window.max.state ? (window.max.side === 'top') ? 'max-top' : '' : '', 
         window.max.state ? (window.max.side === 'left') ? 'max-left' : '' : '', 
         window.max.state ? (window.max.side === 'right') ? 'max-right' : '' : '']"  
@@ -322,16 +319,16 @@ function getRect(targP, section) {
         :min-width="(window.minSize.x) ? window.minSize.x : min.w" :min-height="(window.minSize.y) ? window.minSize.y : min.h"
         @mount="eHandler($event, index)"
         @mousedown="selectWindow(index)"
-        @dblclick="scale(index, 'top')"
         @resize:start="eHandler($event, index, false)"
         @resize:move="eHandler($event, index, false, moving = true)"
         @resize:end="eHandler($event, index, end = true)"
         @drag:start="eHandler($event, index, false)"
         @drag:move="eHandler($event, index, false, moving = true)"
         @drag:end="eHandler($event, index, end = true)">
-            <div class="w-picker" @mousedown="setReplaceCo"
-            :style="window.barColor ? `background-color: ${window.barColor}` : ''">
-                <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon" class="iconW">
+            <div class="w-picker" @mousedown="setReplaceCo" @dblclick="scale(index, 'top')"
+            :style="[window.barColor ? `background-color: ${window.barColor}` : '', window.textColor ? `color: ${window.textColor}` : '']">
+                <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon" class="iconW" draggable="false">
+                <label class="appName">{{ index }}</label>
                 <div class="buttonBar">
                     <button class="minimizeW" @click="minimize(index)">-</button>
                     <button class="closeW">X</button>
@@ -344,8 +341,8 @@ function getRect(targP, section) {
     </div>
     <div class="toolbar">
         <div class="minimContainer" v-for="(window, index) of minWindows">
-            <div class="minimApp" :id="index" @click="unMinimize(index)">
-                <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon">
+            <div class="minimApp" :id="index" @click="unMinimize(index)" :title="index">
+                <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon" draggable="false">
             </div>
         </div>
     </div>
@@ -374,8 +371,6 @@ header {
 
     .upscale {
         position: absolute;
-        
-
     }
     .upscale.top {
         // background-color: rgba(255, 0, 0, 0.4);
@@ -413,12 +408,13 @@ header {
 }
 
 /* Style Fenètres déplacables */
-.default {
+.app {
     width: 25%;
     height: 300px;
     outline: 1px solid black;
     background-color: darkgoldenrod;
-    box-shadow: 2px 2px 4px black;
+    box-shadow: 1px 1px 8px black;
+    box-sizing: border-box;
     
     position: absolute;
     left: 20%;
@@ -433,12 +429,17 @@ header {
 
 .w-picker {
     background-color: gray;
-    border-radius: 10px;
+    border-radius: 10px 10px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 30px;
     padding: 3px;
+}
+
+.appName {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 0.9em;
 }
 
 
@@ -450,7 +451,8 @@ header {
 }
 
 .minimizeW, .closeW {
-    background-color: rgba(255, 255, 255, 0.474);
+    // background-color: rgba(255, 255, 255, 0.474);
+    background-color: transparent;
     border-radius: 50%;
     width: 1.8em;
     height: 1.8em;
@@ -458,6 +460,7 @@ header {
     border: 0;
     margin-left: 5px;
     transition: background-color .2s;
+    color: inherit;
 }
 
 .minimizeW:hover {
@@ -473,13 +476,6 @@ header {
     padding-left: 3px;
 }
 
-.foreground-w {
-    z-index: 2;
-}
-.background-w {
-    z-index: 1;
-}
-
 .moving {
     pointer-events: none;
 }
@@ -492,7 +488,6 @@ header {
     position: absolute;
 
     background-color: rgba(255, 255, 255, 0.2);
-    box-sizing: border-box;
     border: 10px solid rgba(0, 0, 0, 0.4);
     
     visibility: collapse;
