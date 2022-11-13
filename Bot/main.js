@@ -122,23 +122,21 @@ client.login(TOKEN);
 
 // API
 
-const express = require("express");
-const { connect } = require("../API/db/connect");
-const routerUtilisateurs = require("../API/routers/utilisateur");
-const app = express();
+const express = require('express')
+const app = express()
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// Middleware to parse body to JSON for all JSON requests
+app.use(express.json())
 
-app.use("/", routerUtilisateurs);
+// setup routes et ouvrir ports
+const port = 8000
 
-connect("mongodb://localhost:27017/", (err) => {
-  if (err) {
-    console.log("Erreur lors de la connexion à la base de données");
-    process.exit(-1);
-  } else {
-    console.log("********************************* Connexion avec la base de données établie *********************************");
-    app.listen(3000);
-    console.log("************************************* Attente des requêtes au port 3OOO *************************************");
-  }
-});
+app.listen(port, () => {
+  console.log(`Server is running on PORT: ${port}`)
+})
+
+//app.use('/api/coucou', require('../API/routes/coucou'))
+app.use('/api/servers', require('../API/routes/servers'))
+// app.use('/api/messaging', require('../API/routes/messaging'))
+// app.use('/api/kick', require('../API/routes/kick'))
+// app.use('/api/ban', require('../API/routes/ban'))
