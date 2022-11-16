@@ -15,5 +15,9 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.3",
     "vite": "^3.0.9"
-  }
+  },
+  "description": "Ceci est la partie **front-end** du bot D3. \r Fait avec vue.js, le framework du DOM.",
+  "main": "vite.config.js",
+  "author": "",
+  "license": "ISC"
 }
