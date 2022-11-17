@@ -18,13 +18,6 @@ router.get('/:serverID', async (req, res) => {
     const serverID = req.params.serverID
     const guild = await discordinfo.client.guilds.fetch(serverID)
 
-    bot.on('interactionCreate', async interaction => {
-      const allMembers = await interaction.guild.members.fetch();
-      allMembers.forEach(m => {
-         console.log(m.user.username);
-      });
-     });
-
     // Get Members
     const members = await guild.members.cache.map(member => ({id: member.id, idtype: "memberID", name: member.displayName}))
 
