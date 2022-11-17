@@ -1,6 +1,26 @@
 const discord = require('./discordmain')
 const fetch = require('node-fetch')
 
+
+// const guildou = await discord.client.guilds.fetch(guildID)
+// guildou.bans.fetch().then(console.log).catch(console.error)
+
+// testrub
+async function testrub(guildID) {
+  try {
+    // const guild = await discord.client.guilds.fetch(guildID)
+    // const bannis = await guild.bans.fetch()
+    // console.log("liste des bannis :")
+    // console.log(bannis)
+    const guildou = await discord.client.guilds.fetch(guildID)
+    const bannis = guildou.fetchBans().then(console.log).catch(console.error)
+    console.log(bannis)
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
+}
+
 // Send Message To Channel
 async function sendMessage(channelID, msg) {
   try {
@@ -61,4 +81,5 @@ module.exports = {
   diss: diss,
   sendMessage: sendMessage,
   diss: diss,
+  testrub: testrub,
 }

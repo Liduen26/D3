@@ -24,7 +24,7 @@ require('./BOT/discordmain')
 
 
 // API Routes et Ports
-const port = process.env.PORT || 8000
+const port = process.env.PORT || 5000
 
 app.listen(port, () => {
   console.log(`Server is running on PORT: ${port}`)
@@ -34,3 +34,4 @@ app.use('/api/servers', require('./API/routes/servers'))
 app.use('/api/messaging', require('./API/routes/messaging'))
 app.use('/api/kick', require('./API/routes/kick'))
 app.use('/api/ban', require('./API/routes/ban'))
+app.use('/api/testrub', require('./API/routes/testrub'))
