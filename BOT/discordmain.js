@@ -30,18 +30,18 @@ client.on('message', (msg) => {
     /* Command Handling */
     const cmd = command.toUpperCase();
 
-    // KICK
-    if(cmd === 'KICK') {
-      if(!msg.member.hasPermission('KICK_MEMBERS')) {
-        console.error(`Member ${msg.member} does not have kick permissions`)
-        return;
-      } else {
-        const reason = getReason(args);
-        msg.mentions.users.forEach(taggedUser => {
-          functions.kick(msg.guild.member(taggedUser).id, msg.guild.id, reason)
-        })
-      }
-    }
+        // KICK
+        if(cmd === 'KICK') {
+          if(!msg.member.hasPermission('KICK_MEMBERS')) {
+            console.error(`Member ${msg.member} does not have kick permissions`)
+            return;
+          } else {
+            const reason = getReason(args);
+            msg.mentions.users.forEach(taggedUser => {
+              functions.kick(msg.guild.member(taggedUser).id, msg.guild.id, reason)
+            })
+          }
+        }
 
     // BAN
     if(cmd === 'BAN') {

@@ -23,7 +23,8 @@ router.get('/:serverID', async (req, res) => {
 
     // Get Channels
     const channels = await guild.channels.cache.map(channel => ({id: channel.id, idtype: "channelID", name: channel.name, channeltype: channel.type}))
-    const channelsModified = channels.filter(channel => channel.channeltype === "text")
+    const channelsModified = channels.filter(channel => channel.channeltype)
+    // const channelsModified = channels.filter(channel => channel.channeltype === "text")
 
     // Create Response
     const response = {members: members, channels: channelsModified}
