@@ -40,6 +40,15 @@ async function ban(userID, guildID, reason) {
   }
 }
 
+// Crée un salon textuel
+async function createsalontextuel(guildID, channelname){
+  const guild = await discord.client.guilds.fetch(guildID)
+  console.log(guild);
+  /*await guild.channels.create({name : channelname})
+  .then(console.log)
+  .catch(console.error);*/
+}
+
 // Diss a User
 async function diss(channelID, victim) {
   try {
@@ -58,6 +67,7 @@ async function diss(channelID, victim) {
 module.exports = {
   kick: kick,
   ban: ban,
+  createsalontextuel: createsalontextuel,
   diss: diss,
   sendMessage: sendMessage,
   diss: diss,
