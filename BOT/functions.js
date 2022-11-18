@@ -5,16 +5,19 @@ const fetch = require('node-fetch')
 // const guildou = await discord.client.guilds.fetch(guildID)
 // guildou.bans.fetch().then(console.log).catch(console.error)
 
-// testrub
-async function testrub(guildID) {
+// unban
+async function unban(guildID, userID) {
   try {
-    // const guild = await discord.client.guilds.fetch(guildID)
-    // const bannis = await guild.bans.fetch()
-    // console.log("liste des bannis :")
-    // console.log(bannis)
-    const guildou = await discord.client.guilds.fetch(guildID)
-    const bannis = guildou.fetchBans().then(console.log).catch(console.error)
-    console.log(bannis)
+    const guild = await discord.client.guilds.fetch(guildID)
+
+    // check si l'id est bon
+    const bannis = await guild.bans.fetch(userID).then(console.log).catch(console.error);
+
+    // unban l'utilisateur
+    await guild.bans.remove(userID).then(user => console.log(`Unbanned ${user.username} from ${guild.name}`)).catch(console.error);
+
+    console.log("heuu salut")
+
   } catch (err) {
     console.error(err)
     throw err
@@ -81,5 +84,5 @@ module.exports = {
   diss: diss,
   sendMessage: sendMessage,
   diss: diss,
-  testrub: testrub,
+  unban: unban,
 }
