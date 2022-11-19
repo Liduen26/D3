@@ -30,20 +30,23 @@ activesWindows.value = {
             state: false,
             side: ""
         },
-        icon: "Firefox_logo,_2019.svg",
+        icon: "Admin",
         moving: false,
         minSize: {
-            x: false, // false si désactivé (qd même 100x100px)
-            y: false
+            x: 147, // false si désactivé (qd même 100x100px)
+            y: 395
         },
         barColor: '#000',
-        textColor: 'rgb(255, 72, 0)'
+        textColor: 'rgb(255, 72, 0)',
+        content : AdminWindowVue,
+        
     },
     "Spotify": {
         x: 600,
         y: 300,
         w: 450,
         h: 300,
+        
         max: {
             state: false,
             side: ""
@@ -55,7 +58,8 @@ activesWindows.value = {
             y: false
         },
         barColor: false,
-        textColor: false
+        textColor: false,
+        content: AdminWindowVue
     }
 };
 
@@ -67,6 +71,7 @@ minWindows.value = {
         y: 500,
         w: 250,
         h: 300,
+        content: AdminWindowVue,
         max: {
             state: false,
             side: ""
@@ -341,7 +346,7 @@ function getRect(targP, section) {
                 </div>
             </div>
             
-            <div class="w-content"><pre>{{ window }}</pre></div>
+            <div class="w-content"> <component :is= window.content />  </div>
         </vue-resizable> 
 
     </div>
