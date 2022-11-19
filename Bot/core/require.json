@@ -1,8 +1,0 @@
-{
-  "Discord":{"name" : "Discord","path":"discord.js", "type":"global","info":"lancement de la lib discord"},
-  "request":{"name" : "request","path":"request", "type":"global","info":"on charge la methode request pour faire une demande post"},
-  "fs":{"name" : "fs","path":"fs", "type":"global","info":"lancement de la lib de lecture distante"},
-  "util":{"name" : "util","path":"util", "type":"global","info":"lancement de la lib de lecture distante"},
-  "ytdl":{"name" : "ytdl","path":"ytdl-core", "type":"global","info":"lancement et création des variable de la lib youtube"},
-  "googleTTS":{"name" : "googleTTS","path":"google-tts-api", "type":"global","info":"lancement la lib google traduction"}
-}

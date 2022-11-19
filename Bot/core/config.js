@@ -5,5 +5,3 @@ require('dotenv').config();
 exports.http = require('http');
 
 exports.TOKEN=process.env.BOT_TOKEN;//clé du boot discord
-
-exports.PREFIX ="+";//préfix d'appel du boot

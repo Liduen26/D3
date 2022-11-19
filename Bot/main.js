@@ -41,7 +41,6 @@ const loadSlashCommands = (dir = "./commands_slashs/") => {
             const slcName = slashCommand.split(".")[0];
             commands_slashs[slcName]=require(`${dir}/${dirs}/${slashCommand}`);
             console.log(`> /${slcName}`);
-            console.log(commands_slashs);
         }
     });
 };
