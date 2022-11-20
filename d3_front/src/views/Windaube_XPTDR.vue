@@ -79,9 +79,16 @@ minWindows.value = {
     }
 };
 
+// console.log(sessionStorage);
+// Check si il y a bien un token dans la session en cours, sinon renvoie à l'auth
+if (!sessionStorage.accessToken) {
+    const domain = window.location.origin;
+    window.location.assign(domain);
+}
+
+
 // Juste avant l'affichage
 onMounted(() => {
-
     // Si localStorage.activesWindows contient qqchose
     if (localStorage.activesWindows) {
         const data = JSON.parse(localStorage.activesWindows);

@@ -87,7 +87,6 @@ Promise.all([fetchMyGuilds, fetchD3Guilds])
 <style scoped lang="scss">
 .guildList {
     margin: 30px;
-
 }
 
 .guildList .guild {
