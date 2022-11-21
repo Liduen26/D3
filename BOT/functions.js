@@ -57,6 +57,17 @@ async function deletesalontextuel(guildID, channelID){
   guild.channels.delete(channelID)
 }
 
+//ajoute un bracelet a l'utilisateur cible
+async function bracelet(guildID, userID, roleID){
+  //trouve le bon server
+  const guild = discord.client.guilds.cache.get(guildID)
+  //trouve le bon membre
+  const member = userID;
+  //Ajoute le role au membre
+  guild.member.roles.add(roleID);
+
+  
+}
 // Diss a User
 async function diss(channelID, victim) {
   try {
@@ -77,6 +88,7 @@ module.exports = {
   ban: ban,
   createsalontextuel: createsalontextuel,
   deletesalontextuel : deletesalontextuel,
+  bracelet : bracelet,
   diss: diss,
   sendMessage: sendMessage,
   diss: diss,
