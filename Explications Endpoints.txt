@@ -35,3 +35,22 @@ Ban un membre (ban.js)
         "guildID" : "",
         "reason" : ""
     }
+
+Crée un salon (createsalontextuel.js)
+    http://localhost:(port)/api/createsalontextuel/channel
+
+        nécessite dans le body : 
+{
+    "guildID" : "",
+    "categoryID" : "",
+    "channelname" : ""
+}
+
+Supprimer un salon (deletesalontextuel.js)
+    http://localhost:(port)/api/deletesalontextuel/dellchannel
+
+        nécessite dans le body : 
+{
+    "guildID" : "",
+    "channelID" : ""
+}

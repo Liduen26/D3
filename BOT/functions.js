@@ -42,7 +42,7 @@ async function ban(userID, guildID, reason) {
 }
 
 // Crée un salon textuel
-async function createsalontextuel(guildID,channelname){
+async function createsalontextuel(guildID, categoryID, channelname){
   const guild = discord.client.guilds.cache.get(guildID)
   guild.channels.create({
     name: channelname,
@@ -52,14 +52,9 @@ async function createsalontextuel(guildID,channelname){
 
 }
 // Supprime un salon textuel
-async function createsalontextuel(guildID, categoryID ,channelname){
+async function deletesalontextuel(guildID, channelID){
   const guild = discord.client.guilds.cache.get(guildID)
-  guild.channels.create({
-    name: channelname,
-    type: ChannelType.GuildText,
-    parent: categoryID,
-});
-
+  guild.channels.delete(channelID)
 }
 
 // Diss a User
@@ -81,6 +76,7 @@ module.exports = {
   kick: kick,
   ban: ban,
   createsalontextuel: createsalontextuel,
+  deletesalontextuel : deletesalontextuel,
   diss: diss,
   sendMessage: sendMessage,
   diss: diss,

@@ -2,9 +2,9 @@ const express = require('express')
 const router = express.Router()
 const functions = require('../../BOT/functions')
 
-router.post('/channel', async (req, res) => {
+router.post('/dellchannel', async (req, res) => {
   try {
-     await functions.createsalontextuel(req.body.guildID, req.body.channelname)
+     await functions.deletesalontextuel(req.body.guildID, req.body.channelID)
      res.status(200).json({ message: 'channel deleted' })
   } catch (err) {
     res.status(500).json(err)
