@@ -59,14 +59,13 @@ async function deletesalontextuel(guildID, channelID){
 
 //ajoute un bracelet a l'utilisateur cible
 async function bracelet(guildID, userID, roleID){
-  //trouve le bon server
-  const guild = discord.client.guilds.cache.get(guildID)
-  //trouve le bon membre
-  const member = userID;
-  //Ajoute le role au membre
-  guild.member.roles.add(roleID);
 
-  
+//trouve le bon server
+  const guild = discord.client.guilds.cache.get(guildID)
+  //console.log(guild.roles.cache.map(role => ({name : role.name})));
+  //const role = discord.client.guild.roles.cache.get(roleID);
+  //const member = 
+  console.log(guild.members.cache.map(member => ({member : member.name})));
 }
 // Diss a User
 async function diss(channelID, victim) {

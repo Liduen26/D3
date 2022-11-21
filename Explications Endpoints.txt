@@ -54,3 +54,13 @@ Supprimer un salon (deletesalontextuel.js)
     "guildID" : "",
     "channelID" : ""
 }
+
+Ajouter un bracelet a un membre (bracelet.js)
+    http://localhost:(port)/api/bracelet/role
+
+        nécessite dans le body :
+{
+    "guildID" : "1027139435680235550",
+    "userID" : "238660830210555905",
+    "roleID" : "1032221518249332746"
+}
