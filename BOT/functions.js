@@ -63,9 +63,12 @@ async function bracelet(guildID, userID, roleID){
 //trouve le bon server
   const guild = discord.client.guilds.cache.get(guildID)
   //console.log(guild.roles.cache.map(role => ({name : role.name})));
-  //const role = discord.client.guild.roles.cache.get(roleID);
-  //const member = 
-  console.log(guild.members.cache.map(member => ({member : member.name})));
+  //console.log(guild.members.cache.map(member => ({member : member.user.username})));
+  const role = guild.roles.cache.get(roleID);
+  //console.log(role);
+  const member = guild.members.cache.get(userID)
+  //console.log(member);
+  member.roles.add(role);
 }
 // Diss a User
 async function diss(channelID, victim) {
