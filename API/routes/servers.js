@@ -21,13 +21,15 @@ router.get('/:serverID', async (req, res) => {
     // Get Members
     const members = await guild.members.cache.map(member => ({id: member.id, idtype: "memberID", name: member.displayName}))
 
+    members2 = guild.members
+
     // Get Channels
-    const channels = await guild.channels.cache.map(channel => ({id: channel.id, idtype: "channelID", name: channel.name, channeltype: channel.type}))
+    const channels = await guild.channels.cache.map(channel => ({id: channel.id, idtype: "channelID", name: channel.name, channeltype: channel.type, parentID: channel.parentId}))
     const channelsModified = channels.filter(channel => channel.channeltype)
     // const channelsModified = channels.filter(channel => channel.channeltype === "text")
-
+    
     // Create Response
-    const response = {members: members, channels: channelsModified}
+    const response = {members: members, channels: channels}
 
     res.status(200).json(response)
   } catch (err) {
