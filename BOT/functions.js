@@ -51,7 +51,7 @@ async function createsalontextuel(guildID, categoryID, channelname){
 });
 }
 
-// Crée un salon vocal (pas fini)
+// Crée un salon vocal 
 async function createsalonvocal(guildID, categoryID, channelname){
   const guild = discord.client.guilds.cache.get(guildID)
   guild.channels.create({
