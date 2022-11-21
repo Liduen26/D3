@@ -1,5 +1,5 @@
 
-
+Get seulement pour /servers
 Récupérer les infos des membres et des channels (servers.js)
     http://localhost:5000/api/servers/'serverID'
 

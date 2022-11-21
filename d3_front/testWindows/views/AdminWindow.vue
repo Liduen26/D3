@@ -1,4 +1,14 @@
 <script setup>
+import axios from 'axios';
+import{ref} from 'vue';
+
+let messages = ref('');
+
+axios.get('http://localhost:5000/api/servers').then(function (response){
+  messages.value = response;
+});
+
+
 </script>
 
 <template>
@@ -12,7 +22,7 @@
             <div id = salon>
                 <div class="top">salon</div>
                 <div class="contenu">
-                  Test
+                  {{messages}}
                 </div>
             </div>
             <div id = user>
