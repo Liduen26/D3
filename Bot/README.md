@@ -1,6 +1,6 @@
 # Bot Discord : D3
 
-Ceci est un bot discord 
+Ceci est un bot discord utilisant node.js, avec la librairie discord.js.
 
 ## Setup
 

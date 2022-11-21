@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./bandeau', import.meta.url))
+      '@': fileURLToPath(new URL('./testWindows', import.meta.url))
     }
   }
 })

@@ -1,0 +1,33 @@
+{
+  "name": "discord-command-center-v1.0",
+  "version": "1.0.0",
+  "description": "Discord Bot API Express App",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/Void_Prototype/discord-command-center-v1.0.git"
+  },
+  "author": "Mathew Cathcart",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/Void_Prototype/discord-command-center-v1.0/issues"
+  },
+  "homepage": "https://gitlab.com/Void_Prototype/discord-command-center-v1.0#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.18.2",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-loader": "^4.0.2",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-vue": "^7.16.0",
+    "prettier": "^2.3.2"
+  }
+}
