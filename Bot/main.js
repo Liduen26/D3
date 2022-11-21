@@ -11,18 +11,17 @@ const { readdirSync, readFileSync} = require("fs");
 //affichage de la version de node qui lance ce bot
 console.log("node : " + process.version);
 
-const start = JSON.parse(readFileSync("./assets/starter/startD3.json", {encoding:'utf8'}));
+// const start = JSON.parse(readFileSync("./assets/starter/startD3.json", {encoding:'utf8'}));
 
-for (const line of start) {
-    console.log(line);
-}
+// for (const line of start) {
+//     console.log(line);
+// }
 
 
 //initialisation du bot discord et déclaration des permissions nécessaires
 global.client = new Client({
     intents: [
         GatewayIntentBits.Guilds, 
-
     ] 
 });
 
@@ -41,6 +40,7 @@ const loadSlashCommands = (dir = "./commands_slashs/") => {
             const slcName = slashCommand.split(".")[0];
             commands_slashs[slcName]=require(`${dir}/${dirs}/${slashCommand}`);
             console.log(`> /${slcName}`);
+            console.log(commands_slashs);
         }
     });
 };
