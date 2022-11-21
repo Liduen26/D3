@@ -1,9 +1,49 @@
 const discord = require('./discordmain')
 const fetch = require('node-fetch')
+const { joinVoiceChannel, getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 
+// playsound
+async function playsound(guildID) {
+  try {    
+    const player = createAudioPlayer()
+    const resource = createAudioResource('C:\Utilisateurs\ruben\Bureau\waw.mp3')
 
-// const guildou = await discord.client.guilds.fetch(guildID)
-// guildou.bans.fetch().then(console.log).catch(console.error)
+    const connection = getVoiceConnection(guildID);
+
+    player.play(resource);
+    connection.subscribe(player);
+
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
+}
+
+// leavechannel
+async function leavechannel(guildID) {
+  try {
+    const connection = getVoiceConnection(guildID);
+    connection.destroy()
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
+}
+
+// joinchannel
+async function joinchannel(channelID, guildID) {
+  try {
+    const guild = await discord.client.guilds.fetch(guildID)
+    const connection = joinVoiceChannel({
+      channelId: channelID,
+      guildId: guildID,
+      adapterCreator: guild.voiceAdapterCreator,
+    });
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
+}
 
 // unban
 async function unban(guildID, userID) {
@@ -15,8 +55,6 @@ async function unban(guildID, userID) {
 
     // unban l'utilisateur
     await guild.bans.remove(userID).then(user => console.log(`Unbanned ${user.username} from ${guild.name}`)).catch(console.error);
-
-    console.log("heuu salut")
 
   } catch (err) {
     console.error(err)
@@ -85,4 +123,7 @@ module.exports = {
   sendMessage: sendMessage,
   diss: diss,
   unban: unban,
+  joinchannel: joinchannel,
+  leavechannel: leavechannel,
+  playsound: playsound,
 }
