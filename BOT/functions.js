@@ -1,5 +1,6 @@
 const discord = require('./discordmain')
 const fetch = require('node-fetch')
+const { ChannelType } = require('discord.js')
 
 // Send Message To Channel
 async function sendMessage(channelID, msg) {
@@ -42,11 +43,8 @@ async function ban(userID, guildID, reason) {
 
 // Crée un salon textuel
 async function createsalontextuel(guildID, channelname){
-  const guild = await discord.client.guilds.fetch(guildID)
-  console.log(guild);
-  /*await guild.channels.create({name : channelname})
-  .then(console.log)
-  .catch(console.error);*/
+const guild = await discord.client.guilds.fetch(guildID)
+console.log(guild);
 }
 
 // Diss a User
