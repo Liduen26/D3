@@ -9,11 +9,6 @@ let placer = ref({state: false, place: ""});
 
 let replaceCo = ref({x: 0, y: 0});
 
-// const page = document.querySelector(".page");
-// const pageRect = page.getBoundingClientRect();
-
-// let screen = ref({width: pageRect.width, height: pageRect.height});
-
 
 let activesWindows = ref({});
 activesWindows.name = "activesWindows"
@@ -336,7 +331,11 @@ function getRect(targP, section) {
                 <label class="appName">{{ index }}</label>
                 <div class="buttonBar">
                     <button class="minimizeW" @click="minimize(index)">-</button>
-                    <button class="closeW">X</button>
+                    <button class="closeW">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
             
@@ -459,6 +458,9 @@ header {
 
 .minimizeW, .closeW {
     // background-color: rgba(255, 255, 255, 0.474);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: transparent;
     border-radius: 50%;
     width: 1.8em;
@@ -471,7 +473,7 @@ header {
 }
 
 .minimizeW:hover {
-    background-color: rgba(255, 166, 0, 0.6);
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .closeW:hover {
