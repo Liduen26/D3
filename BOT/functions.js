@@ -49,10 +49,19 @@ async function createsalontextuel(guildID, categoryID, channelname){
     type: ChannelType.GuildText,
     parent: categoryID,
 });
-
 }
-// Supprime un salon textuel
-async function deletesalontextuel(guildID, channelID){
+
+// Crée un salon vocal (pas fini)
+async function createsalonvocal(guildID, categoryID, channelname){
+  const guild = discord.client.guilds.cache.get(guildID)
+  guild.channels.create({
+    name: channelname,
+    type: ChannelType.GuildVoice,
+    parent: categoryID,
+});
+}
+// Supprime un salon textuel / vocal
+async function deletesalon(guildID, channelID){
   const guild = discord.client.guilds.cache.get(guildID)
   guild.channels.delete(channelID)
 }
@@ -70,6 +79,13 @@ async function bracelet(guildID, userID, roleID){
   member.roles.add(role);
 }
 
+//retire un bracelet a l'utilisateur cible
+async function nobracelet(guildID, userID, roleID){
+    const guild = discord.client.guilds.cache.get(guildID)
+    const role = guild.roles.cache.get(roleID);
+    const member = guild.members.cache.get(userID)
+    member.roles.remove(role);
+  }
 // Diss a User
 async function diss(channelID, victim) {
   try {
@@ -89,8 +105,10 @@ module.exports = {
   kick: kick,
   ban: ban,
   createsalontextuel: createsalontextuel,
-  deletesalontextuel : deletesalontextuel,
+  createsalonvocal : createsalonvocal,
+  deletesalon : deletesalon,
   bracelet : bracelet,
+  nobracelet : nobracelet,
   diss: diss,
   sendMessage: sendMessage,
   diss: diss,
