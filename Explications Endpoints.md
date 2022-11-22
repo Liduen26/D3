@@ -47,7 +47,7 @@
     nécessite dans le body : 
     {
         "userID" : "",
-        "guildID" : "",
+        "guildID" : ""
     }
 
 # Envoyer le bot dans un channel (joinchannel.js)
@@ -56,7 +56,7 @@
     nécessite dans le body : 
     {
         "channelID" : "",
-        "guildID" : "",
+        "guildID" : ""
     }
 
 # Décconecter le bot d'un channel (leavechannel.js)
@@ -64,7 +64,7 @@
 
     nécessite dans le body : 
     {
-        "guildID" : "",
+        "guildID" : ""
     }
 
 # Jouer un son sur le bot (playsound.js) PAS ENCORE FONCTIONNEL
@@ -72,5 +72,54 @@
 
     nécessite dans le body : 
     {
-        "guildID" : "",
+        "guildID" : ""
     }
+
+# Crée un salon textuel (createsalontextuel.js)
+    POST : http://localhost:(port)/api/createsalontextuel/channel
+
+        nécessite dans le body : 
+{
+    "guildID" : "",
+    "categoryID" : "",
+    "channelname" : ""
+}
+
+# Crée un salon vocal (createsalonvocal.js)
+    POST : http://localhost:(port)/api/createsalonvocal/channel
+
+        nécessite dans le body : 
+{
+    "guildID" : "",
+    "categoryID" : "",
+    "channelname" : ""
+}
+
+# Supprimer un salon (deletesalon.js)
+    POST : http://localhost:(port)/api/deletesalon/dellchannel
+
+        nécessite dans le body : 
+{
+    "guildID" : "",
+    "channelID" : ""
+}
+
+# Ajouter un bracelet a un membre (bracelet.js)
+    POST : http://localhost:(port)/api/bracelet/role
+
+        nécessite dans le body :
+{
+    "guildID" : "1027139435680235550",
+    "userID" : "238660830210555905",
+    "roleID" : "1032221518249332746"
+}
+
+# Retirer un bracelet a un membre (nobracelet.js)
+    POST : http://localhost:(port)/api/nobracelet/role
+
+        nécessite dans le body :
+{
+    "guildID" : "1027139435680235550",
+    "userID" : "238660830210555905",
+    "roleID" : "1032221518249332746"
+}
