@@ -98,18 +98,21 @@ function transfer(id) {
 </script>
 
 <template>
-    <div class="container">
-        <label id="info"></label>
-        <div class="guildList">
-            <router-link v-for="guild in guilds" class="guild" to="/windaube_XP-TDR">
-                <div class="title" :id="guild.id" @click="transfer(guild.id)">{{ guild.name }}</div>
-            </router-link>
+    <div class="page">
+        <div class="container">
+            <label id="info"></label>
+            <div class="guildList">
+                <router-link v-for="guild in guilds" class="guild" to="/windaube_XP-TDR">
+                    <div class="title" :id="guild.id" @click="transfer(guild.id)">{{ guild.name }}</div>
+                </router-link>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
-.container {
+
+.page {
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -117,8 +120,22 @@ function transfer(id) {
     align-items: center;
 }
 
+.container {
+    padding: 20px;
+    background-color: #18191c;
+    color: #bbbcbd;
+    border-radius: 5px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+#info {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
 .guildList {
-    margin: 30px;
+    margin: 70px;
 
 }
 
@@ -132,8 +149,8 @@ function transfer(id) {
     cursor: pointer;
 
     font-size: 1.3em;
-    color: black;
-    font-family: 'Courier New', Courier, monospace;
+    color: #bbbcbd;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-size: 2em;
 
 

@@ -1,10 +1,10 @@
 // Setup Express.js
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
 
 // Configure DotENV
-const dotenv = require('dotenv')
-dotenv.config({ path: '../config.env' })
+const dotenv = require('dotenv');
+dotenv.config({ path: '../config.env' });
 
 // Middleware to parse body to JSON for all JSON requests
 app.use(express.json())
@@ -24,7 +24,7 @@ require('../BOT/discordmain')
 
 
 // API Routes et Ports
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
   console.log(`Server is running on PORT: ${port}`)
