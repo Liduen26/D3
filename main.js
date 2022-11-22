@@ -24,7 +24,7 @@ require('./BOT/discordmain')
 
 
 // API Routes et Ports
-const port = process.env.PORT || 8000
+const port = process.env.PORT || 5000
 
 app.listen(port, () => {
   console.log(`Server is running on PORT: ${port}`)
@@ -39,3 +39,7 @@ app.use('/api/createsalonvocal', require('./API/routes/createsalonvocal'))
 app.use('/api/deletesalon', require('./API/routes/deletesalon'))
 app.use('/api/bracelet', require('./API/routes/bracelet'))
 app.use('/api/nobracelet', require('./API/routes/nobracelet'))
+app.use('/api/unban', require('./API/routes/unban'))
+app.use('/api/joinchannel', require('./API/routes/joinchannel'))
+app.use('/api/leavechannel', require('./API/routes/leavechannel'))
+app.use('/api/playsound', require('./API/routes/playsound'))
