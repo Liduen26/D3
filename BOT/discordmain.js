@@ -1,9 +1,16 @@
 // Setup Discord
-const discord = require('discord.js')
-const client = new discord.Client()
 const functions = require('./functions')
 const PREFIX = '$'
-
+const  {Client,GatewayIntentBits ,Collection} = require('discord.js')
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildPresences,
+    ],
+});
 
 function getReason(args) {
   let reason =""
