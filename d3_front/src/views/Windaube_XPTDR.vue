@@ -6,7 +6,7 @@ import AdminWindowVue from './app/AdminWindow.vue';
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
 const min = { w: 100, h: 100 };
-let placer = ref({state: false, place: ""});
+let placer = ref({state: false});
 
 let replaceCo = ref({x: 0, y: 0});
 
@@ -18,7 +18,7 @@ let replaceCo = ref({x: 0, y: 0});
 
 let activesWindows = ref({});
 activesWindows.name = "activesWindows"
-activesWindows.value = {
+activesWindows.value = ({
     "un grand pouvoir implique de grandes responsabilité": {
         x: 300,
         y: 150,
@@ -36,7 +36,7 @@ activesWindows.value = {
         },
         barColor: '#000',
         textColor: 'rgb(255, 72, 0)',
-        content : AdminWindowVue,
+        content : AdminWindowVue
     },
     "Spotify": {
         x: 600,
@@ -54,13 +54,12 @@ activesWindows.value = {
             y: false
         },
         barColor: false,
-        textColor: false
+        textColor: false,
+        previewing: false
     }
-};
+});
 
-let minWindows = ref({});
-minWindows.name = "minWindows";
-minWindows.value = {
+let minWindows = ref({
     "Minecraft": {
         x: 600,
         y: 500,
@@ -77,9 +76,10 @@ minWindows.value = {
             y: false
         },
         barColor: false,
-        textColor: false
+        textColor: false,
+        previewing: false
     }
-};
+});
 
 // console.log(sessionStorage);
 // Check si il y a bien un token dans la session en cours, sinon renvoie à l'auth
@@ -127,38 +127,80 @@ onMounted(() => {
  * @param {*} i index du tableau
  * @param {boolean} end Est-ce que c'est la fin d'une action ? (pour la save)
  */
-function eHandler(data, i, end, moving) {
+function evtHandler(data, app, state) {
     // Redéfinit les variables des objet par rapport au depl et resize
-    activesWindows.value[i].w = data.width;
-    activesWindows.value[i].h = data.height;
-    activesWindows.value[i].x = data.left;
-    activesWindows.value[i].y = data.top;
-
-
-    const appBar = document.querySelector(`#${i} .w-picker`);
-
-    if (end) {
-        activesWindows.value[i].moving = false;
-        delete placer.value.app;
-        saveState();
-    }
+    activesWindows.value[app].w = data.width;
+    activesWindows.value[app].h = data.height;
+    activesWindows.value[app].x = data.left;
+    activesWindows.value[app].y = data.top;
     
-    if (moving) {
-        activesWindows.value[i].moving = true;
-        placer.value.app = i;
+    // Qd la fenêtre est en déplacement
+    if (state === "moving") {
+        activesWindows.value[app].moving = true;
+        const page = document.querySelector(".page");
+        const pageRect = page.getBoundingClientRect();
     
-        if (activesWindows.value[i].max.state) {
-            activesWindows.value[i].max.state = false;
-
-            const page = document.querySelector(".page");
-            const pageRect = page.getBoundingClientRect();
+        // Check si la fenêtre a été agrandie, si oui remet à taille normale ------------
+        if (activesWindows.value[app].max.state) {
+            activesWindows.value[app].max.state = false;
 
             
             // Déplacer la fenêtre sur les coordonées de la souris 
-            activesWindows.value[i].x = replaceCo.value.x - (data.width / 2);
-            activesWindows.value[i].y = replaceCo.value.y - 10 - pageRect.top;
+            activesWindows.value[app].x = replaceCo.value.x - (data.width / 2);
+            activesWindows.value[app].y = replaceCo.value.y - 10 - pageRect.top;
+        } 
+
+        // Détections des upscales ------------------------------------------------------
+        const enterZone = 1;
+        const exitZone = 6;
+
+        // Détection upscale en haut
+        if (data.top <= enterZone) {
+            console.log("top");
+            placer.value.preview = true;
+            activesWindows.value[app].previewing = true;
+            placer.value.side = "top";
+
+        } else if (data.top > exitZone && placer.value.preview && placer.value.side === "top") {
+            previewReset(app)
         }
+
+        // Détection upscale à gauche
+        if (data.left <= enterZone) {
+            console.log("left");
+            placer.value.preview = true;
+            activesWindows.value[app].previewing = true;
+            placer.value.side = "left";
+
+        } else if (data.left > exitZone && placer.value.preview && placer.value.side === "left") {
+            previewReset(app)
+        }
+
+        // Détection upscale à droite
+        if (data.left + data.width >= pageRect.width - enterZone) {
+            console.log("right");
+            placer.value.preview = true;
+            activesWindows.value[app].previewing = true;
+            placer.value.side = "right";
+
+        } else if (data.left + data.width < pageRect.width - exitZone && placer.value.preview && placer.value.side === "right") {
+            previewReset(app)
+        }
+
+        // ------------------------------------------------------------------------------
         
+    }
+
+    // Relachement du clic
+    if (state === "end") {
+        console.log(placer.value);
+        if (placer.value.preview) {
+            console.log("oui");
+            scale(app, placer.value.side);
+        }
+
+        activesWindows.value[app].moving = false;
+        saveState();
     }
 }
 
@@ -223,64 +265,20 @@ function selectWindow(index) {
     saveState();
 }
 
-
-function upscale(side, reset) {
-    placer.value.state = reset ? false : true;
-    placer.value.place = side;
-    let i;
-
-    if (placer.value.app) {
-        i = placer.value.app;
-    }
-
-    if (reset) {
-        const divPlacer = document.querySelector(`.w-placer.${placer.value.place}`);
-        divPlacer.classList.remove("placer-visible");
-        divPlacer.classList.remove("placer-maximized");
-        divPlacer.classList.remove("placer-half-left");
-        divPlacer.classList.remove("placer-half-right");
-    } else if (i) {
-        console.log(i);
-        
-        // Gestion de la div transparente qui montre où va être l'app
-        const divPlacer = document.querySelector(`.w-placer.${placer.value.place}`);
-        const app = document.querySelector(`#${i}`);
-
-        divPlacer.classList.add("placer-visible");
-
-        if (placer.value.place === "top") {
-            divPlacer.classList.add("placer-maximized");
-            
-        } else if(placer.value.place === "left" || placer.value.place === "right") {
-            divPlacer.classList.add(`placer-half-${placer.value.place}`);
-        }
-        
-        
-        const zonePlacer = document.querySelector(`.upscale.${placer.value.place}`);
-        zonePlacer.addEventListener("mouseup", mouseup);
-        zonePlacer.addEventListener("mouseleave", mouseleave)
-
-        // Quand on lache le clic / Gestion de l'agrandissement réel de l'app
-        function mouseup() {
-            console.log("salut !", app);
-
-            scale(i, side);
-            
-            zonePlacer.removeEventListener("mouseup", mouseup);
-            zonePlacer.removeEventListener("mouseleave", mouseleave);
-        }
-
-        // Pour enlever les event listeners
-        function mouseleave() {
-            zonePlacer.removeEventListener("mouseleave", mouseleave);
-            zonePlacer.removeEventListener("mouseup", mouseup);
-        }
-    }
+function scale(app, side) {
+    activesWindows.value[app].max.state = true;
+    activesWindows.value[app].max.side = side;
+    previewReset(app);
 }
 
-function scale(i, side) {
-    activesWindows.value[i].max.state = true;
-    activesWindows.value[i].max.side = side;
+/**
+ * Reset la fenêtre blanche de preview pour l'upscale
+ * @param {String} app 
+ */
+function previewReset(app) {
+    placer.value.preview = false;
+    console.log(placer.value);
+    activesWindows.value[app].previewing = false;
 }
 
 /**
@@ -307,45 +305,50 @@ function getRect(targP, section) {
         <h3>Test fenêtres déplaçables</h3>
     </header> -->
     <div class="page">
-        <div class="upscale top" @mouseenter="upscale('top')" @mouseleave="upscale('top', reset = true)"></div>
-        <div class="upscale left" @mouseenter="upscale('left')" @mouseleave="upscale('left', reset = true)"></div>
-        <div class="upscale right" @mouseenter="upscale('right')" @mouseleave="upscale('right', reset = true)"></div>
-
-        <div class="w-placer top"></div>
-        <div class="w-placer left"></div>
-        <div class="w-placer right"></div>
+        <div class="w-placer top" :class="[
+            placer.preview ? (placer.side === 'top') ? 'placer-visible placer-maximized' : '' : ''
+        ]"></div>
+        <div class="w-placer left" :class="[
+            placer.preview ? (placer.side === 'left') ? 'placer-visible placer-half-left' : '' : ''
+        ]"></div>
+        <div class="w-placer right" :class="[
+            placer.preview ? (placer.side === 'right') ? 'placer-visible placer-half-right' : '' : ''
+        ]"></div>
 
         <vue-resizable v-for="(window, index) of activesWindows" :key="index"
         :id="index" class="app"
-        :class="[window.moving ? 'moving' : '', 
+        :class="[window.moving ? 'moving' : '', window.previewing ? 'previewing' : '', 
         window.max.state ? (window.max.side === 'top') ? 'max-top' : '' : '', 
         window.max.state ? (window.max.side === 'left') ? 'max-left' : '' : '', 
         window.max.state ? (window.max.side === 'right') ? 'max-right' : '' : '']"  
-        :dragSelector="dragSelector" :active="handlers" :fit-parent="false"
+        :dragSelector="dragSelector" :active="handlers" :fit-parent="true"
         :width="window.w" :height="window.h"
         :left="window.x" :top="window.y"
         :min-width="(window.minSize.x) ? window.minSize.x : min.w" :min-height="(window.minSize.y) ? window.minSize.y : min.h"
-        @mount="eHandler($event, index)"
+        @mount="evtHandler($event, index)"
         @mousedown="selectWindow(index)"
-        @resize:start="eHandler($event, index, false)"
-        @resize:move="eHandler($event, index, false, moving = true)"
-        @resize:end="eHandler($event, index, end = true)"
-        @drag:start="eHandler($event, index, false)"
-        @drag:move="eHandler($event, index, false, moving = true)"
-        @drag:end="eHandler($event, index, end = true)">
+        @resize:start="evtHandler($event, index, state = 'start')"
+        @resize:move="evtHandler($event, index, state = 'resize')"
+        @resize:end="evtHandler($event, index, state = 'end')"
+        @drag:start="evtHandler($event, index, state = 'start')"
+        @drag:move="evtHandler($event, index, state = 'moving')"
+        @drag:end="evtHandler($event, index, state = 'end')">
             <div class="w-picker" @mousedown="setReplaceCo" @dblclick="scale(index, 'top')"
             :style="[window.barColor ? `background-color: ${window.barColor}` : '', window.textColor ? `color: ${window.textColor}` : '']">
                 <img :src="`./src/assets/icons/${window.icon}.png`" alt="icon" class="iconW" draggable="false">
                 <label class="appName">{{ index }}</label>
                 <div class="buttonBar">
                     <button class="minimizeW" @click="minimize(index)">-</button>
-                    <button class="closeW">X</button>
+                    <button class="closeW">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
             
             <div class="w-content"> <component :is= window.content /> </div>
         </vue-resizable> 
-
     </div>
     <div class="toolbar">
         <button @click="log">Log</button>
@@ -357,6 +360,35 @@ function getRect(targP, section) {
         </div>
     </div>
 </template>
+
+<style lang="scss">
+.resizable-component {
+    .resizable-r {
+        z-index: unset !important;
+    }
+    .resizable-rb {
+        z-index: unset !important;
+    }
+    .resizable-b {
+        z-index: unset !important;
+    }
+    .resizable-lb {
+        z-index: unset !important;
+    }
+    .resizable-l {
+        z-index: unset !important;
+    }
+    .resizable-lt {
+        z-index: unset !important;
+    }
+    .resizable-t {
+        z-index: unset !important;
+    }
+    .resizable-rt {
+        z-index: unset !important;
+    }
+}
+</style>
 
 <style scoped lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Courgette&display=swap');
@@ -426,7 +458,6 @@ header {
     outline: 1px solid black;
     background-color: darkgoldenrod;
     box-shadow: 1px 1px 8px black;
-    box-sizing: border-box;
     
     position: absolute;
     left: 20%;
@@ -435,8 +466,16 @@ header {
     display: flex;
     flex-direction: column;
     border-radius: 10px;
-    
-    transition: border-color .2s, left .01s, top .01s, height .02s, width .02s; 
+
+    will-change: left, top;
+    // -webkit-transition: border-color .2s;
+    // -moz-transition: border-color .2s, left .01s, top .01s, height .02s, width .02s;
+    // -o-transition: border-color .2s, left .01s, top .01s, height .02s, width .02s;
+    // // transition: border-color .2s, left .01s linear, top .01s linear, height .02s linear, width .02s linear; 
+
+    &.moving {
+        z-index: 5;
+    }
 }
 
 .w-picker {
@@ -445,7 +484,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 30px;
+    height: 4vh;
     padding: 3px;
 }
 
@@ -467,6 +506,9 @@ header {
 
 .minimizeW, .closeW {
     // background-color: rgba(255, 255, 255, 0.474);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: transparent;
     border-radius: 50%;
     width: 1.8em;
@@ -479,7 +521,7 @@ header {
 }
 
 .minimizeW:hover {
-    background-color: rgba(255, 166, 0, 0.6);
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 .closeW:hover {
@@ -491,9 +533,7 @@ header {
     padding-left: 3px;
 }
 
-.moving {
-    pointer-events: none;
-}
+
 
 
 /* Placer */
@@ -508,6 +548,7 @@ header {
     visibility: collapse;
     opacity: 0%;
     transition: all .5s;
+    
 
     &.top {
         left: 50%;
@@ -531,6 +572,7 @@ header {
     &.placer-visible {
         visibility: visible;
         opacity: 100%;
+        z-index: 4;
     }
     
     &.placer-maximized {
@@ -587,13 +629,13 @@ header {
 
 
 .minimApp {
-    height: 92%;
+    height: 100%;
     display: flex;
     align-items: center;
     padding: 0 1.6vh;
     margin-bottom: -4px;
     background-color: rgba(255, 255, 255, 0.1);
-    border-bottom: 2px solid cyan;
+    border-bottom: 3px solid orange;
     border-radius: 3px;
 
     transition: background-color .2s;

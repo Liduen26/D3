@@ -1,37 +1,14 @@
-# Discord Command Center V1.0
+### Nécessite : 
 
-## Intro
-This is a full-stack discord bot-command center which allows a user to interact with any discord bot through a Nuxt front-end interfacing with an Express Rest API. 
-Through this bot, users are able to execute the basic commands of kicking, banning, messaging, and dissing. 
+# Bot de base
+- Créer dans le dossier source un fichier nommé "config.env" sous ce format :
+    DISCORD_BOT_TOKEN='METTRE TOKEN'
+    PORT='METTRE PORT'
+- npm install express
+- npm install discordjs (vérifier que ça soit bien la version 14)
 
-The youtube video tutorial for this project is located here: https://youtu.be/VrrYymK45i4
-
-![Web App Discord Command Center Preview](discordbotcommandcenter1.gif)
-![Mobile Size Discord Command Center Preview](discordbotcommandcenter2.gif)
-
-## Main Frameworks and Libraries Used
-- Nuxt.js (Vue.js)
-- Express.js (Node.js)
-- Vuetify
-- Discord.js
-
-## Setup
-### Step 1
-Clone the required assets from GitLab, and install the node packages
-
-### Step 2
-Setup config environment variables file called 'config.env'. The variables required are as follows:
-DISCORD_BOT_TOKEN='your token here'
-INSULT_GEN_URI=https://evilinsult.com/generate_insult.php?lang=en&type=json
-PORT='port number here'
-
-### Step 3
-Run the node instance and client:
-
-Server (while in the root project directory):
-> node main.js
-
-Client (while in the client/ directory):
-> npm run dev
-
-
+# Pour jouer du son : (pas encore fonctionnel)
+- npm install @discordjs/voice libsodium-wrappers (Encryption packages)
+- npm install ffmpeg-static (permet de lire des MP3 entre autre)
+- npm install opusscript (encoding library)
+- npm install @discordjs/voice (librarie discordjs voice)

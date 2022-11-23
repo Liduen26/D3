@@ -28,10 +28,3 @@ Kick un membre (kick.js)
 
 Ban un membre (ban.js)
     http://localhost:5000/api/ban/user
-
-    nécessite dans le body : 
-    {
-        "userID" : "",
-        "guildID" : "",
-        "reason" : ""
-    }
