@@ -1,7 +1,7 @@
 <script setup>
 import VueResizable from 'vue-resizable';
 import { onMounted, ref } from "vue";
-import AdminWindowVue from './views/AdminWindow.vue';
+import AdminWindowVue from '../src/views/app/AdminWindow.vue';
 
 
 

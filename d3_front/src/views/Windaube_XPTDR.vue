@@ -1,6 +1,7 @@
 <script setup>
 import VueResizable from 'vue-resizable';
 import { onMounted, ref } from "vue";
+import AdminWindowVue from './app/AdminWindow.vue';
 
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
@@ -18,7 +19,7 @@ let replaceCo = ref({x: 0, y: 0});
 let activesWindows = ref({});
 activesWindows.name = "activesWindows"
 activesWindows.value = {
-    "Firefox": {
+    "un grand pouvoir implique de grandes responsabilité": {
         x: 300,
         y: 150,
         w: 300,
@@ -27,14 +28,15 @@ activesWindows.value = {
             state: false,
             side: ""
         },
-        icon: "Firefox_logo,_2019.svg",
+        icon: "Admin",
         moving: false,
         minSize: {
-            x: false, // false si désactivé (qd même 100x100px)
-            y: false
+            x: 402, // false si désactivé (qd même 100x100px)
+            y: 480
         },
         barColor: '#000',
-        textColor: 'rgb(255, 72, 0)'
+        textColor: 'rgb(255, 72, 0)',
+        content : AdminWindowVue,
     },
     "Spotify": {
         x: 600,
@@ -116,6 +118,7 @@ onMounted(() => {
     if (localStorage.focusWindow) {
         focusWindow.value = localStorage.focusWindow;
     }
+
 })
 
 /**
@@ -332,7 +335,7 @@ function getRect(targP, section) {
         @drag:end="eHandler($event, index, end = true)">
             <div class="w-picker" @mousedown="setReplaceCo" @dblclick="scale(index, 'top')"
             :style="[window.barColor ? `background-color: ${window.barColor}` : '', window.textColor ? `color: ${window.textColor}` : '']">
-                <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon" class="iconW" draggable="false">
+                <img :src="`./src/assets/icons/${window.icon}.png`" alt="icon" class="iconW" draggable="false">
                 <label class="appName">{{ index }}</label>
                 <div class="buttonBar">
                     <button class="minimizeW" @click="minimize(index)">-</button>
@@ -340,7 +343,7 @@ function getRect(targP, section) {
                 </div>
             </div>
             
-            <div class="w-content"><pre>{{ window }}</pre></div>
+            <div class="w-content"> <component :is= window.content /> </div>
         </vue-resizable> 
 
     </div>
@@ -349,13 +352,15 @@ function getRect(targP, section) {
         <button @click="clearStorage">Clear</button>
         <div class="minimContainer" v-for="(window, index) of minWindows">
             <div class="minimApp" :id="index" @click="unMinimize(index)" :title="index">
-                <img :src="`./testWindows/assets/icons/${window.icon}.png`" alt="icon" draggable="false">
+                <img :src="`./src/assets/icons/${window.icon}.png`" alt="icon" draggable="false">
             </div>
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Courgette&display=swap');
+
 /* Mise en page */
 header {
     display: flex;
@@ -373,7 +378,7 @@ header {
     position: relative;
     overflow: hidden;
 
-    background: no-repeat center/cover url("./testWindows/assets/back/Squadron\ 42\ -\ Star\ Citizen\ Screenshot\ 2022.08.08\ -\ 18.14.29.28.png") ;
+    background: no-repeat center/cover url("./src/assets/back/Squadron\ 42\ -\ Star\ Citizen\ Screenshot\ 2022.08.08\ -\ 18.14.29.28.png") ;
 
 
     .upscale {
@@ -445,8 +450,11 @@ header {
 }
 
 .appName {
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-    font-size: 0.9em;
+    text-align: center;
+    font-family: 'Courgette', cursive;
+    font-size: 0.8em;
+    padding-left: 10px;
+    color: gold;
 }
 
 
