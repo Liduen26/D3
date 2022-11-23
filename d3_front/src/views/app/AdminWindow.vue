@@ -19,40 +19,45 @@ const input = ref(null);
 // fonction channels
 function suppr(i) {
   axios ({
-    method : 'post',
-    url : 'http://localhost:5000/api/messaging/message/'+i,
+    method : 'POST',
+    url : 'http://10.8.111.195:5000/api/deletesalon/dellchannel',
     data : {
-      message : "Changer ça en supprimer"
+      guildID : sessionStorage.idGuild,
+      channelID : i
     }
   });
 };
 
 function addbot(i) {
+  console.log('channel id de général :'+i);
   axios ({
-    method : 'post',
-    url : 'http://localhost:5000/api/messaging/message/'+i,
+    method : 'POST',
+    url : 'http://10.8.111.195:5000/api/joinchannel',
     data : {
-      message : "Changer ça ajouter bot"
+      channelID : i,
+      guildID : sessionStorage.idGuild,
     }
   });
 };
 
 function delbot(i) {
   axios ({
-    method : 'post',
-    url : 'http://localhost:5000/api/messaging/message/'+i,
+    method : 'POST',
+    url : 'http://10.8.111.195:5000/api/leavechannel',
     data : {
-      message : "Changer ça retirer bot"
+      guildID : sessionStorage.idGuild,
     }
   });
 };
 
 function restrain(i) {
   axios ({
-    method : 'post',
-    url : 'http://localhost:5000/api/messaging/message/'+i,
+    method : 'POST',
+    url : 'http://localhost:5000/api/unban/user',
     data : {
-      message : "Changer ça en restraindre"
+      userID :"1044980052821028974",
+      guildID : sessionStorage.idGuild
+
     }
   });
 };
@@ -60,30 +65,40 @@ function restrain(i) {
 // fonction members
 function ban(i) {
   axios ({
-    method : 'post',
-    url : 'http://localhost:5000/api/messaging/message/1032251826495561749',
+    method : 'POST',
+    url : 'http://localhost:5000/api/ban/user',
     data : {
-      message : "ton id est"+ i
+      userID : i,
+      guildID : sessionStorage.idGuild,
+      reason : "tu étais chiant"
+
     }
   });
 };
 
 function putbracelet(i) {
   axios ({
-    method : 'post',
-    url : 'http://localhost:5000/api/messaging/message/1032251826495561749',
+    method : 'POST',
+    url : 'http://10.8.111.195:5000/api/bracelet/role',
     data : {
-      message : "ton id est"+ i
+      userID :i,
+      guildID : sessionStorage.idGuild,
+      roleID : "1032221518249332746"
+
     }
   });
 };
 
 function delbracelt(i) {
+  console.log(i);
   axios ({
-    method : 'post',
-    url : 'http://localhost:5000/api/messaging/message/1032251826495561749',
+    method : 'POST',
+    url : 'http://10.8.111.195:5000/api/nobracelet/norole',
     data : {
-      message : "ton id est"+ i
+      userID :i,
+      guildID : sessionStorage.idGuild,
+      roleID : "1032221518249332746"
+
     }
   });
 };
@@ -119,13 +134,43 @@ function poster(i) {
   var mess = document.getElementById('poster');
   console.log(mess.value);
   axios ({
-    method : 'post',
+    method : 'POST',
     url : 'http://localhost:5000/api/messaging/message/'+ i,
     data : {
       message : mess.value
     }
   });
 };
+
+function creer(i){
+  console.log("c");
+  var mess = document.getElementById('poster');
+  axios ({
+    method : 'POST',
+    url : 'http://10.8.111.195:5000/api/createsalontextuel/channel',
+    data : {
+      channelname : mess.value,
+      categoryID : "1027139435680235551",
+      guildID : sessionStorage.idGuild,
+      
+    }
+  });
+}
+
+function creerV(i){
+  console.log("c");
+  var mess = document.getElementById('poster');
+  axios ({
+    method : 'POST',
+    url : 'http://10.8.111.195:5000/api/createsalonvocal/channel',
+    data : {
+      channelname : mess.value,
+      categoryID : "1027139436124848188",
+      guildID : sessionStorage.idGuild,
+      
+    }
+  });
+}
 
 </script>
 
@@ -167,13 +212,15 @@ function poster(i) {
         </div>
     </div>
       <div id="footer">
+        <button @click="creer(i)"> Créer textuel </button>
         <input id = "poster" type="text" placeholder="poster"/>
+        <button @click="creerV(i)"> Créer vocal </button>
         <div>
           <button v-for="channel in channels" class="but" v-on:click="poster(channel.id)">{{channel.name}}</button>
         </div>
       </div>
-</div>
-</div>   
+  </div>
+</div>    
   
 </template>
 
