@@ -197,7 +197,7 @@ function poster(i) {
   left : 0px;
   right: 0px;
   color: aliceblue;
-  background-image: url("C:\Users\mirin\Desktop\d3\d3_front\image\1092728.jpg");
+  background-image: url("./src/assets/back/1092728.jpg");
   background-size: cover;
  
     
