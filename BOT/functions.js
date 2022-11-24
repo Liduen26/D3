@@ -1,18 +1,29 @@
 const discord = require('./discordmain')
 const fetch = require('node-fetch')
 const { ChannelType } = require('discord.js')
-const { joinVoiceChannel, getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
+const { joinVoiceChannel, getVoiceConnection, createAudioPlayer, createAudioResource, AudioPlayerStatus, generateDependencyReport } = require('@discordjs/voice');
 
 // playsound
 async function playsound(guildID) {
   try {    
     const player = createAudioPlayer()
-    const resource = createAudioResource('C:\Utilisateurs\ruben\Bureau\waw.mp3')
 
-    const connection = getVoiceConnection(guildID);
+		player.on('error', error => {
+			console.error(`Error: ${error.message} with resource`);
+		});
+
+    const resource = createAudioResource('C://Users//ruben//OneDrive//Documents//Projet D3 S4//d3//BOT//waw.mp3')
 
     player.play(resource);
-    connection.subscribe(player);
+
+    const connection = getVoiceConnection(guildID)
+
+    const subscription = connection.subscribe(player)
+
+    if (subscription) {
+			// Unsubscribe après 5 secondes (arrête de jouer l'audio sur la voice connection)
+			setTimeout(() => subscription.unsubscribe(), 30_000);
+		}
 
   } catch (err) {
     console.error(err)
@@ -35,10 +46,11 @@ async function leavechannel(guildID) {
 async function joinchannel(channelID, guildID) {
   try {
     const guild = await discord.client.guilds.fetch(guildID)
+    const voiceChannel = discord.client.channels.cache.get(channelID)
     const connection = joinVoiceChannel({
       channelId: channelID,
       guildId: guildID,
-      adapterCreator: guild.voiceAdapterCreator,
+      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
     });
   } catch (err) {
     console.error(err)
