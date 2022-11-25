@@ -1,6 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 
+const url = import.meta.env.VITE_URL_API || 'http://localhost:5000';
+
 let myGuilds = ref([]);
 let d3Guilds = ref([]);
 let guilds = ref([]);
@@ -40,8 +42,7 @@ if (!accessToken) {
 
     
     
-    //Ordi ruben : http://10.8.111.195:5000/api/servers
-    const fetchD3Guilds = fetch('http://localhost:5000/api/servers', {
+    const fetchD3Guilds = fetch(url + '/api/servers', {
         method: 'GET',
         headers: {
             accept: 'application/json',

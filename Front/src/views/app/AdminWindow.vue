@@ -2,15 +2,15 @@
 import axios from 'axios';
 import{ref} from 'vue';
 
-
+const url = import.meta.env.VITE_URL_API || 'http://localhost:5000';
 
 let channels = ref('');
-axios.get('http://localhost:5000/api/servers/'+ sessionStorage.idGuild).then(function (response){
+axios.get(url + '/api/servers/'+ sessionStorage.idGuild).then(function (response){
   channels.value = response.data.channels;
 });
 
 let members = ref('');
-axios.get('http://localhost:5000/api/servers/'+ sessionStorage.idGuild).then(function (response){
+axios.get(url + '/api/servers/'+ sessionStorage.idGuild).then(function (response){
   members.value = response.data.members;
 });
 
@@ -20,7 +20,7 @@ const input = ref(null);
 function suppr(i) {
   axios ({
     method : 'POST',
-    url : 'http://localhost:5000/api/deletesalon/dellchannel',
+    url : url + '/api/deletesalon/dellchannel',
     data : {
       guildID : sessionStorage.idGuild,
       channelID : i
@@ -32,7 +32,7 @@ function addbot(i) {
   console.log('channel id de général :'+i);
   axios ({
     method : 'POST',
-    url : 'http://localhost:5000/api/joinchannel',
+    url : url + '/api/joinchannel',
     data : {
       channelID : i,
       guildID : sessionStorage.idGuild,
@@ -43,7 +43,7 @@ function addbot(i) {
 function delbot(i) {
   axios ({
     method : 'POST',
-    url : 'http://localhost:5000/api/leavechannel',
+    url : url + '/api/leavechannel',
     data : {
       guildID : sessionStorage.idGuild,
     }
@@ -53,7 +53,7 @@ function delbot(i) {
 function restrain(i) {
   axios ({
     method : 'POST',
-    url : 'http://localhost:5000/api/unban/user',
+    url : url + '/api/unban/user',
     data : {
       userID :"1044980052821028974",
       guildID : sessionStorage.idGuild
@@ -66,7 +66,7 @@ function restrain(i) {
 function ban(i) {
   axios ({
     method : 'POST',
-    url : 'http://localhost:5000/api/ban/user',
+    url : url + '/api/ban/user',
     data : {
       userID : i,
       guildID : sessionStorage.idGuild,
@@ -79,7 +79,7 @@ function ban(i) {
 function putbracelet(i) {
   axios ({
     method : 'POST',
-    url : 'http://localhost:5000/api/bracelet/role',
+    url : url + '/api/bracelet/role',
     data : {
       userID :i,
       guildID : sessionStorage.idGuild,
@@ -93,7 +93,7 @@ function delbracelt(i) {
   console.log(i);
   axios ({
     method : 'POST',
-    url : 'http://localhost:5000/api/nobracelet/norole',
+    url : url + '/api/nobracelet/norole',
     data : {
       userID :i,
       guildID : sessionStorage.idGuild,
@@ -108,12 +108,12 @@ function delbracelt(i) {
   console.log (input.value);
   if(input.value == null || input.value =="reset"){
     let channels = ref('');
-    axios.get('http://localhost:5000/api/servers/'+ sessionStorage.idGuild).then(function (response){
+    axios.get(url + '/api/servers/'+ sessionStorage.idGuild).then(function (response){
     channels.value = response.data.channels;
     });
 
     let members = ref('');
-    axios.get('http://localhost:5000/api/servers/'+ sessionStorage.idGuild).then(function (response){
+    axios.get(url + '/api/servers/'+ sessionStorage.idGuild).then(function (response){
       members.value = response.data.members;
     });
   }
@@ -135,7 +135,7 @@ function poster(i) {
   console.log(mess.value);
   axios ({
     method : 'POST',
-    url : 'http://localhost:5000/api/messaging/message/'+ i,
+    url : url + '/api/messaging/message/'+ i,
     data : {
       message : mess.value
     }
@@ -147,7 +147,7 @@ function creer(i){
   var mess = document.getElementById('poster');
   axios ({
     method : 'POST',
-    url : 'http://localhost:5000/api/createsalontextuel/channel',
+    url : url + '/api/createsalontextuel/channel',
     data : {
       channelname : mess.value,
       categoryID : "1027139435680235551",
@@ -162,7 +162,7 @@ function creerV(i){
   var mess = document.getElementById('poster');
   axios ({
     method : 'POST',
-    url : 'http://localhost:5000/api/createsalonvocal/channel',
+    url : url + '/api/createsalonvocal/channel',
     data : {
       channelname : mess.value,
       categoryID : "1027139436124848188",
