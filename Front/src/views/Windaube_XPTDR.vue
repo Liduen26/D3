@@ -3,6 +3,14 @@ import VueResizable from 'vue-resizable';
 import { onMounted, ref } from "vue";
 import AdminWindowVue from './app/AdminWindow.vue';
 
+const mesComposants = {
+    "un grand pouvoir implique de grandes responsabilitées": AdminWindowVue,
+ };
+
+let valFromLS = "un grand pouvoir implique de grandes responsabilitées";
+
+mesComposants[valFromLS];
+
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
 const min = { w: 100, h: 100 };
@@ -19,7 +27,7 @@ let replaceCo = ref({x: 0, y: 0});
 let activesWindows = ref({});
 activesWindows.name = "activesWindows"
 activesWindows.value = ({
-    "un grand pouvoir implique de grandes responsabilité": {
+    "un grand pouvoir implique de grandes responsabilitées": {
         x: 300,
         y: 150,
         w: 300,
@@ -36,7 +44,7 @@ activesWindows.value = ({
         },
         barColor: '#000',
         textColor: 'rgb(255, 72, 0)',
-        content : AdminWindowVue
+        content : "un grand pouvoir implique de grandes responsabilitées"
     },
     "Spotify": {
         x: 600,
@@ -100,6 +108,7 @@ onMounted(() => {
         // Boucle pour remplir le tableau des fenêtres actives à partir des datas dans les cookies
         for (const window in data) {
             activesWindows.value[window] = data[window];
+            
         }
     }
     
@@ -347,7 +356,7 @@ function getRect(targP, section) {
                 </div>
             </div>
             
-            <div class="w-content"> <component :is= window.content /> </div>
+            <div class="w-content"> <component :is="mesComposants[window.content]" /> </div>
         </vue-resizable> 
     </div>
     <div class="toolbar">

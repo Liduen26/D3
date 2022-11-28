@@ -239,7 +239,7 @@ function creerV(i){
 #body_window{
   position: absolute;
   top: 0px;
-  margin-top: 36px;
+  margin-top: 30px;
   bottom: 0px;
   left : 0px;
   right: 0px;
