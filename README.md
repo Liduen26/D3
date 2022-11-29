@@ -46,10 +46,13 @@ Le programme devrait fonctionner maintenant, si vous voyez les logs, il devrait 
 
 ## 2. Le front-end
 
-Commencer par créer un fichier **.env** dans lequel vous mettez ceci : 
+Commencer par créer un fichier **.env** au niveau du dossier Front, dans lequel vous mettez ceci : 
 ```
-VITE_URL_API='http://localhost'
+VITE_URL_API='http://localhost:5000'
 ```
+Ceci vous permettra de changer l'url sur lequel le front envoie ses requêtes à l'API si besoin
+
+
 Ensuite, ouvrez un nouveau CMD, et toujours en partant de la racine du projet : 
 
 ```shell
