@@ -2,32 +2,30 @@
 import VueResizable from 'vue-resizable';
 import { onMounted, ref } from "vue";
 import AdminWindowVue from './app/AdminWindow.vue';
+import iFrameVue from './app/iFrame.vue';
 
-const mesComposants = {
-    "un grand pouvoir implique de grandes responsabilitées": AdminWindowVue,
- };
 
-let valFromLS = "un grand pouvoir implique de grandes responsabilitées";
-
-mesComposants[valFromLS];
-
+// Paramètres des déplacement des apps
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
 const min = { w: 100, h: 100 };
+
 let placer = ref({state: false});
 
 let replaceCo = ref({x: 0, y: 0});
 
 // const page = document.querySelector(".page");
 // const pageRect = page.getBoundingClientRect();
-
 // let screen = ref({width: pageRect.width, height: pageRect.height});
 
 
-let activesWindows = ref({});
-activesWindows.name = "activesWindows"
-activesWindows.value = ({
-    "un grand pouvoir implique de grandes responsabilitées": {
+const importApps = ref({
+    "adminComp": AdminWindowVue,
+    "iFrame": iFrameVue
+});
+
+let apps = ref({
+    "Un grand pouvoir implique de grandes responsabilitées": {
         x: 300,
         y: 150,
         w: 300,
@@ -44,7 +42,8 @@ activesWindows.value = ({
         },
         barColor: '#000',
         textColor: 'rgb(255, 72, 0)',
-        content : "un grand pouvoir implique de grandes responsabilitées"
+        previewing: false,
+        content : "adminComp"
     },
     "Spotify": {
         x: 600,
@@ -63,7 +62,76 @@ activesWindows.value = ({
         },
         barColor: false,
         textColor: false,
+        previewing: false,
+        content: "iFrame",
+        props: "url='test'"
+    },
+    "Minecraft": {
+        x: 600,
+        y: 500,
+        w: 250,
+        h: 300,
+        max: {
+            state: false,
+            side: ""
+        },
+        icon: "minecraft-icon",
+        moving: false,
+        minSize: {
+            x: false,
+            y: false
+        },
+        barColor: false,
+        textColor: false,
         previewing: false
+    }
+});
+
+
+let activesWindows = ref({
+    "Un grand pouvoir implique de grandes responsabilitées": {
+        x: 300,
+        y: 150,
+        w: 300,
+        h: 200,
+        max: {
+            state: false,
+            side: ""
+        },
+        icon: "Admin",
+        moving: false,
+        minSize: {
+            x: 402, // false si désactivé (qd même 100x100px)
+            y: 480
+        },
+        barColor: '#000',
+        textColor: 'rgb(255, 72, 0)',
+        previewing: false,
+        content : "adminComp",
+        props: {}
+    },
+    "RefineryCalc": {
+        x: 600,
+        y: 300,
+        w: 450,
+        h: 300,
+        max: {
+            state: false,
+            side: ""
+        },
+        icon: "icon_spoty",
+        moving: false,
+        minSize: {
+            x: 850,
+            y: 750
+        },
+        barColor: false,
+        textColor: false,
+        previewing: false,
+        content: "iFrame",
+        props: {
+            url: "https://outofspace.fr/RafineryCalcJs/"
+        }
     }
 });
 
@@ -88,6 +156,7 @@ let minWindows = ref({
         previewing: false
     }
 });
+console.log(activesWindows.value);
 
 // console.log(sessionStorage);
 // Check si il y a bien un token dans la session en cours, sinon renvoie à l'auth
@@ -356,7 +425,7 @@ function getRect(targP, section) {
                 </div>
             </div>
             
-            <div class="w-content"> <component :is="mesComposants[window.content]" /> </div>
+            <div class="w-content"> <component :is="importApps[window.content]" v-bind="window.props"/> </div>
         </vue-resizable> 
     </div>
     <div class="toolbar">
@@ -371,6 +440,10 @@ function getRect(targP, section) {
 </template>
 
 <style lang="scss">
+* {
+    box-sizing: border-box;
+}
+
 .resizable-component {
     .resizable-r {
         z-index: unset !important;
@@ -474,7 +547,7 @@ header {
     
     display: flex;
     flex-direction: column;
-    border-radius: 10px;
+    border-radius: 4px;
 
     will-change: left, top;
     // -webkit-transition: border-color .2s;
@@ -489,12 +562,12 @@ header {
 
 .w-picker {
     background-color: gray;
-    border-radius: 10px 10px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     height: 4vh;
     padding: 3px;
+    border-radius: 4px 4px 0 0;
 }
 
 .appName {
@@ -543,6 +616,12 @@ header {
 }
 
 
+.w-content {
+    height: 100%;
+    width: 100%;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+}
 
 
 /* Placer */
