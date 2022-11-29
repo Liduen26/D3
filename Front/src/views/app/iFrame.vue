@@ -1,21 +1,21 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from "vue";
 
 const props = defineProps({
-  url: String
+  url: String,
+  id: String
 });
 
-const urlApi = import.meta.env.VITE_URL_API || 'http://localhost:5000';
 
-let url = ref();
-url = props.url;
-console.log(url);
+let url = ref(props.url);
+let id = ref(props.id);
+
 
 
 </script>
 
 <template>
-    <iframe :src="url"></iframe>
+    <iframe :id="id" :src="url" ></iframe>
 </template>
 
 <style>

@@ -130,7 +130,8 @@ let activesWindows = ref({
         previewing: false,
         content: "iFrame",
         props: {
-            url: "https://outofspace.fr/RafineryCalcJs/"
+            url: "https://outofspace.fr/RafineryCalcJs/",
+            id: "refineryCalc"
         }
     }
 });
@@ -196,7 +197,6 @@ onMounted(() => {
     if (localStorage.focusWindow) {
         focusWindow.value = localStorage.focusWindow;
     }
-
 })
 
 /**
@@ -271,9 +271,7 @@ function evtHandler(data, app, state) {
 
     // Relachement du clic
     if (state === "end") {
-        console.log(placer.value);
         if (placer.value.preview) {
-            console.log("oui");
             scale(app, placer.value.side);
         }
 
@@ -336,10 +334,12 @@ function unMinimize(index) {
     selectWindow(index)
 }
 
-function selectWindow(index) {
-    let obj = activesWindows.value[index];
-    delete activesWindows.value[index];
-    activesWindows.value[index] = obj;
+function selectWindow(evt, index) {
+    // let obj = activesWindows.value[index];
+    // delete activesWindows.value[index];
+    // activesWindows.value[index] = obj;
+
+    evt.target.focus();
     saveState();
 }
 
@@ -404,7 +404,7 @@ function getRect(targP, section) {
         :left="window.x" :top="window.y"
         :min-width="(window.minSize.x) ? window.minSize.x : min.w" :min-height="(window.minSize.y) ? window.minSize.y : min.h"
         @mount="evtHandler($event, index)"
-        @mousedown="selectWindow(index)"
+        @mousedown="selectWindow($event, index)"
         @resize:start="evtHandler($event, index, state = 'start')"
         @resize:move="evtHandler($event, index, state = 'resize')"
         @resize:end="evtHandler($event, index, state = 'end')"
