@@ -14,9 +14,9 @@ let placer = ref({state: false});
 
 let replaceCo = ref({x: 0, y: 0});
 
-// const page = document.querySelector(".page");
-// const pageRect = page.getBoundingClientRect();
-// let screen = ref({width: pageRect.width, height: pageRect.height});
+let z_index = ref(1);
+
+let focusWindow = ref("");
 
 
 const importApps = ref({
@@ -89,11 +89,12 @@ let apps = ref({
 
 
 let activesWindows = ref({
-    "Un grand pouvoir implique de grandes responsabilitées": {
+    "Administrator": {
         x: 300,
         y: 150,
         w: 300,
         h: 200,
+        z: 1,
         max: {
             state: false,
             side: ""
@@ -104,17 +105,18 @@ let activesWindows = ref({
             x: 402, // false si désactivé (qd même 100x100px)
             y: 480
         },
+        focus: false,
         barColor: '#000',
         textColor: 'rgb(255, 72, 0)',
         previewing: false,
         content : "adminComp",
-        props: {}
     },
     "RefineryCalc": {
         x: 600,
         y: 300,
         w: 450,
         h: 300,
+        z: 1,
         max: {
             state: false,
             side: ""
@@ -123,15 +125,15 @@ let activesWindows = ref({
         moving: false,
         minSize: {
             x: 850,
-            y: 750
+            y: 500
         },
+        focus: false,
         barColor: false,
         textColor: false,
         previewing: false,
         content: "iFrame",
         props: {
-            url: "https://outofspace.fr/RafineryCalcJs/",
-            id: "refineryCalc"
+            url: "http://outofspace.fr/RafineryCalcJs/",
         }
     }
 });
@@ -142,6 +144,7 @@ let minWindows = ref({
         y: 500,
         w: 250,
         h: 300,
+        z: 1,
         max: {
             state: false,
             side: ""
@@ -152,12 +155,12 @@ let minWindows = ref({
             x: false,
             y: false
         },
+        focus: false,
         barColor: false,
         textColor: false,
         previewing: false
     }
 });
-console.log(activesWindows.value);
 
 // console.log(sessionStorage);
 // Check si il y a bien un token dans la session en cours, sinon renvoie à l'auth
@@ -173,12 +176,10 @@ onMounted(() => {
     if (localStorage.activesWindows) {
         const data = JSON.parse(localStorage.activesWindows);
         activesWindows.value = {};
-        console.log(data);
         
         // Boucle pour remplir le tableau des fenêtres actives à partir des datas dans les cookies
         for (const window in data) {
             activesWindows.value[window] = data[window];
-            
         }
     }
     
@@ -197,7 +198,14 @@ onMounted(() => {
     if (localStorage.focusWindow) {
         focusWindow.value = localStorage.focusWindow;
     }
-})
+
+
+    // Setup initial du z-index pour l'affichage superposé
+    for (const app of Object.entries(activesWindows.value)) {
+        app[1].z = z_index.value++;
+    }
+    selectWindow(focusWindow.value);
+});
 
 /**
  * Gère les évents et la prise en compte des données au déplacement et resize
@@ -234,7 +242,7 @@ function evtHandler(data, app, state) {
 
         // Détection upscale en haut
         if (data.top <= enterZone) {
-            console.log("top");
+            // console.log("top");
             placer.value.preview = true;
             activesWindows.value[app].previewing = true;
             placer.value.side = "top";
@@ -245,7 +253,7 @@ function evtHandler(data, app, state) {
 
         // Détection upscale à gauche
         if (data.left <= enterZone) {
-            console.log("left");
+            // console.log("left");
             placer.value.preview = true;
             activesWindows.value[app].previewing = true;
             placer.value.side = "left";
@@ -256,7 +264,7 @@ function evtHandler(data, app, state) {
 
         // Détection upscale à droite
         if (data.left + data.width >= pageRect.width - enterZone) {
-            console.log("right");
+            // console.log("right");
             placer.value.preview = true;
             activesWindows.value[app].previewing = true;
             placer.value.side = "right";
@@ -267,6 +275,22 @@ function evtHandler(data, app, state) {
 
         // ------------------------------------------------------------------------------
         
+    }
+
+    if (state === "resize") {
+        // Check si la fenêtre a été agrandie, si oui remet à taille normale ------------
+        if (activesWindows.value[app].max.state) {
+            const appNode = document.querySelector("#" + app);
+            const page = document.querySelector(".page");
+            const rectApp = getRect(appNode, page);
+            
+            activesWindows.value[app].w = rectApp.width;
+            activesWindows.value[app].h = rectApp.height;
+            activesWindows.value[app].x = rectApp.left;
+            activesWindows.value[app].y = rectApp.top;
+
+            activesWindows.value[app].max.state = false;
+        } 
     }
 
     // Relachement du clic
@@ -291,6 +315,7 @@ function setReplaceCo(e) {
  */
 function saveState() {
     localStorage.setItem("activesWindows", JSON.stringify(activesWindows.value));
+    localStorage.setItem("focusWindow", JSON.stringify(focusWindow.value));
     localStorage.setItem("minWindows", JSON.stringify(minWindows.value));
     
     const page = document.querySelector(".page");
@@ -318,9 +343,9 @@ function clearStorage() {
  * @param {*} index 
  */
 function minimize(index) {
-    console.log("slt");
     minWindows.value[index] = activesWindows.value[index];
     delete activesWindows.value[index];
+    focusWindow.value = Object.keys(activesWindows.value)[Object.keys(activesWindows.value).length - 1];
     saveState();
 }
 
@@ -331,16 +356,16 @@ function minimize(index) {
 function unMinimize(index) {
     activesWindows.value[index] = minWindows.value[index];
     delete minWindows.value[index];
-    selectWindow(index)
+    selectWindow(index);
 }
 
-function selectWindow(evt, index) {
-    // let obj = activesWindows.value[index];
-    // delete activesWindows.value[index];
-    // activesWindows.value[index] = obj;
-
-    evt.target.focus();
-    saveState();
+function selectWindow(app) {  
+    if (focusWindow.value !== app) {
+        z_index.value++;
+        activesWindows.value[app].z = z_index.value;
+        focusWindow.value = app;
+        saveState();
+    }
 }
 
 function scale(app, side) {
@@ -361,8 +386,9 @@ function previewReset(app) {
 
 /**
  * Retourne les coordonnées d'une div par rapport à une autre
- * @param targP La div dont on veut les coordonnées
- * @param section Le référentiel
+ * @param {Element} targP La div dont on veut les coordonnées
+ * @param {Element} section Le référentiel
+ * @return {object} Les coordonnées dans un objet
  */
 function getRect(targP, section) {
     let offset = [];
@@ -398,13 +424,14 @@ function getRect(targP, section) {
         :class="[window.moving ? 'moving' : '', window.previewing ? 'previewing' : '', 
         window.max.state ? (window.max.side === 'top') ? 'max-top' : '' : '', 
         window.max.state ? (window.max.side === 'left') ? 'max-left' : '' : '', 
-        window.max.state ? (window.max.side === 'right') ? 'max-right' : '' : '']"  
+        window.max.state ? (window.max.side === 'right') ? 'max-right' : '' : '']"
+        :style="{'z-index': window.z}"
         :dragSelector="dragSelector" :active="handlers" :fit-parent="true"
         :width="window.w" :height="window.h"
         :left="window.x" :top="window.y"
         :min-width="(window.minSize.x) ? window.minSize.x : min.w" :min-height="(window.minSize.y) ? window.minSize.y : min.h"
         @mount="evtHandler($event, index)"
-        @mousedown="selectWindow($event, index)"
+        @mousedown="selectWindow(index)"
         @resize:start="evtHandler($event, index, state = 'start')"
         @resize:move="evtHandler($event, index, state = 'resize')"
         @resize:end="evtHandler($event, index, state = 'end')"
@@ -425,7 +452,8 @@ function getRect(targP, section) {
                 </div>
             </div>
             
-            <div class="w-content"> <component :is="importApps[window.content]" v-bind="window.props"/> </div>
+            <div class="w-content"> <component :is="importApps[window.content]" v-bind="window.props"/></div>
+            <div class="frontPlate" v-if="(window.content === 'iFrame' && focusWindow !== index)"></div>
         </vue-resizable> 
     </div>
     <div class="toolbar">
@@ -621,6 +649,14 @@ header {
     width: 100%;
     border-radius: 0 0 4px 4px;
     overflow: hidden;
+}
+
+.frontPlate {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 
