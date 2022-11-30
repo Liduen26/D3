@@ -25,68 +25,90 @@ const importApps = ref({
 });
 
 let apps = ref({
-    "Un grand pouvoir implique de grandes responsabilitées": {
-        x: 300,
-        y: 150,
-        w: 300,
-        h: 200,
-        max: {
-            state: false,
-            side: ""
+    "Administrator": {
+        state: {
+            x: 300,
+            y: 150,
+            w: 300,
+            h: 200,
+            z: 1,
+            max: {
+                state: false,
+                side: ""
+            },
+            moving: false,
+            focus: false,
+            previewing: false,
+            active: true
         },
-        icon: "Admin",
-        moving: false,
-        minSize: {
-            x: 402, // false si désactivé (qd même 100x100px)
-            y: 480
-        },
-        barColor: '#000',
-        textColor: 'rgb(255, 72, 0)',
-        previewing: false,
-        content : "adminComp"
+        settings: {
+            icon: "Admin",
+            minSize: {
+                x: 402, // false si désactivé (qd même 100x100px)
+                y: 480
+            },
+            barColor: '#000',
+            textColor: 'rgb(255, 72, 0)',
+            content : "adminComp",
+        }
     },
-    "Spotify": {
-        x: 600,
-        y: 300,
-        w: 450,
-        h: 300,
-        max: {
-            state: false,
-            side: ""
+    "RefineryCalc": {
+        state: {
+            x: 600,
+            y: 300,
+            w: 450,
+            h: 300,
+            z: 1,
+            max: {
+                state: false,
+                side: ""
+            },
+            moving: false,
+            focus: false,
+            previewing: false,
+            active: true
         },
-        icon: "icon_spoty",
-        moving: false,
-        minSize: {
-            x: false,
-            y: false
-        },
-        barColor: false,
-        textColor: false,
-        previewing: false,
-        content: "iFrame",
-        props: "url='test'"
+        settings: {
+            icon: "icon_spoty",
+            minSize: {
+                x: 850,
+                y: 500
+            },
+            barColor: '#455f78',
+            textColor: false,
+            content: "iFrame",
+            props: {
+                url: "http://outofspace.fr/RafineryCalcJs/",
+            }
+        }
     },
     "Minecraft": {
-        x: 600,
-        y: 500,
-        w: 250,
-        h: 300,
-        max: {
-            state: false,
-            side: ""
+        state: {
+            x: 600,
+            y: 500,
+            w: 250,
+            h: 300,
+            z: 1,
+            max: {
+                state: false,
+                side: ""
+            },
+            moving: false,
+            focus: false,
+            previewing: false,
+            active: true
         },
-        icon: "minecraft-icon",
-        moving: false,
-        minSize: {
-            x: false,
-            y: false
-        },
-        barColor: false,
-        textColor: false,
-        previewing: false
+        settings: {
+            icon: "minecraft-icon",
+            minSize: {
+                x: false,
+                y: false
+            },
+            barColor: false,
+            textColor: false,
+        }    
     }
 });
-
 
 let activesWindows = ref({
     "Administrator": {
@@ -128,7 +150,7 @@ let activesWindows = ref({
             y: 500
         },
         focus: false,
-        barColor: false,
+        barColor: '#455f78',
         textColor: false,
         previewing: false,
         content: "iFrame",
@@ -175,11 +197,11 @@ onMounted(() => {
     // Si localStorage.activesWindows contient qqchose
     if (localStorage.activesWindows) {
         const data = JSON.parse(localStorage.activesWindows);
-        activesWindows.value = {};
+        apps.settings = {};
         
         // Boucle pour remplir le tableau des fenêtres actives à partir des datas dans les cookies
         for (const window in data) {
-            activesWindows.value[window] = data[window];
+            apps.settings[window] = data[window];
         }
     }
     
@@ -201,7 +223,7 @@ onMounted(() => {
 
 
     // Setup initial du z-index pour l'affichage superposé
-    for (const app of Object.entries(activesWindows.value)) {
+    for (const app of Object.entries(apps.settings)) {
         app[1].z = z_index.value++;
     }
     selectWindow(focusWindow.value);
@@ -215,25 +237,25 @@ onMounted(() => {
  */
 function evtHandler(data, app, state) {
     // Redéfinit les variables des objet par rapport au depl et resize
-    activesWindows.value[app].w = data.width;
-    activesWindows.value[app].h = data.height;
-    activesWindows.value[app].x = data.left;
-    activesWindows.value[app].y = data.top;
+    apps.settings[app].w = data.width;
+    apps.settings[app].h = data.height;
+    apps.settings[app].x = data.left;
+    apps.settings[app].y = data.top;
     
     // Qd la fenêtre est en déplacement
     if (state === "moving") {
-        activesWindows.value[app].moving = true;
+        apps.settings[app].moving = true;
         const page = document.querySelector(".page");
         const pageRect = page.getBoundingClientRect();
     
         // Check si la fenêtre a été agrandie, si oui remet à taille normale ------------
-        if (activesWindows.value[app].max.state) {
-            activesWindows.value[app].max.state = false;
+        if (apps.settings[app].max.state) {
+            apps.settings[app].max.state = false;
 
             
             // Déplacer la fenêtre sur les coordonées de la souris 
-            activesWindows.value[app].x = replaceCo.value.x - (data.width / 2);
-            activesWindows.value[app].y = replaceCo.value.y - 10 - pageRect.top;
+            apps.settings[app].x = replaceCo.value.x - (data.width / 2);
+            apps.settings[app].y = replaceCo.value.y - 10 - pageRect.top;
         } 
 
         // Détections des upscales ------------------------------------------------------
@@ -244,7 +266,7 @@ function evtHandler(data, app, state) {
         if (data.top <= enterZone) {
             // console.log("top");
             placer.value.preview = true;
-            activesWindows.value[app].previewing = true;
+            apps.settings[app].previewing = true;
             placer.value.side = "top";
 
         } else if (data.top > exitZone && placer.value.preview && placer.value.side === "top") {
@@ -255,7 +277,7 @@ function evtHandler(data, app, state) {
         if (data.left <= enterZone) {
             // console.log("left");
             placer.value.preview = true;
-            activesWindows.value[app].previewing = true;
+            apps.settings[app].previewing = true;
             placer.value.side = "left";
 
         } else if (data.left > exitZone && placer.value.preview && placer.value.side === "left") {
@@ -266,7 +288,7 @@ function evtHandler(data, app, state) {
         if (data.left + data.width >= pageRect.width - enterZone) {
             // console.log("right");
             placer.value.preview = true;
-            activesWindows.value[app].previewing = true;
+            apps.settings[app].previewing = true;
             placer.value.side = "right";
 
         } else if (data.left + data.width < pageRect.width - exitZone && placer.value.preview && placer.value.side === "right") {
@@ -279,17 +301,17 @@ function evtHandler(data, app, state) {
 
     if (state === "resize") {
         // Check si la fenêtre a été agrandie, si oui remet à taille normale ------------
-        if (activesWindows.value[app].max.state) {
+        if (apps.settings[app].max.state) {
             const appNode = document.querySelector("#" + app);
             const page = document.querySelector(".page");
             const rectApp = getRect(appNode, page);
             
-            activesWindows.value[app].w = rectApp.width;
-            activesWindows.value[app].h = rectApp.height;
-            activesWindows.value[app].x = rectApp.left;
-            activesWindows.value[app].y = rectApp.top;
+            apps.settings[app].w = rectApp.width;
+            apps.settings[app].h = rectApp.height;
+            apps.settings[app].x = rectApp.left;
+            apps.settings[app].y = rectApp.top;
 
-            activesWindows.value[app].max.state = false;
+            apps.settings[app].max.state = false;
         } 
     }
 
@@ -299,7 +321,7 @@ function evtHandler(data, app, state) {
             scale(app, placer.value.side);
         }
 
-        activesWindows.value[app].moving = false;
+        apps.settings[app].moving = false;
         saveState();
     }
 }
@@ -314,7 +336,7 @@ function setReplaceCo(e) {
  * Sauvegarde l'état du système, les tableaux de fenètres actives et minimisées, et la fenêtre en focus
  */
 function saveState() {
-    localStorage.setItem("activesWindows", JSON.stringify(activesWindows.value));
+    localStorage.setItem("activesWindows", JSON.stringify(apps.settings));
     localStorage.setItem("focusWindow", JSON.stringify(focusWindow.value));
     localStorage.setItem("minWindows", JSON.stringify(minWindows.value));
     
@@ -343,9 +365,9 @@ function clearStorage() {
  * @param {*} index 
  */
 function minimize(index) {
-    minWindows.value[index] = activesWindows.value[index];
-    delete activesWindows.value[index];
-    focusWindow.value = Object.keys(activesWindows.value)[Object.keys(activesWindows.value).length - 1];
+    minWindows.value[index] = apps.settings[index];
+    delete apps.settings[index];
+    focusWindow.value = Object.keys(apps.settings)[Object.keys(apps.settings).length - 1];
     saveState();
 }
 
@@ -354,7 +376,7 @@ function minimize(index) {
  * @param {*} index 
  */
 function unMinimize(index) {
-    activesWindows.value[index] = minWindows.value[index];
+    apps.settings[index] = minWindows.value[index];
     delete minWindows.value[index];
     selectWindow(index);
 }
@@ -362,15 +384,15 @@ function unMinimize(index) {
 function selectWindow(app) {  
     if (focusWindow.value !== app) {
         z_index.value++;
-        activesWindows.value[app].z = z_index.value;
+        apps.settings[app].z = z_index.value;
         focusWindow.value = app;
         saveState();
     }
 }
 
 function scale(app, side) {
-    activesWindows.value[app].max.state = true;
-    activesWindows.value[app].max.side = side;
+    apps.settings[app].max.state = true;
+    apps.settings[app].max.side = side;
     previewReset(app);
 }
 
@@ -381,7 +403,7 @@ function scale(app, side) {
 function previewReset(app) {
     placer.value.preview = false;
     console.log(placer.value);
-    activesWindows.value[app].previewing = false;
+    apps.settings[app].previewing = false;
 }
 
 /**
@@ -419,17 +441,17 @@ function getRect(targP, section) {
             placer.preview ? (placer.side === 'right') ? 'placer-visible placer-half-right' : '' : ''
         ]"></div>
 
-        <vue-resizable v-for="(window, index) of activesWindows" :key="index"
+        <vue-resizable v-for="(window, index) in apps" v-if="window.state.active" :key="index" 
         :id="index" class="app"
-        :class="[window.moving ? 'moving' : '', window.previewing ? 'previewing' : '', 
-        window.max.state ? (window.max.side === 'top') ? 'max-top' : '' : '', 
-        window.max.state ? (window.max.side === 'left') ? 'max-left' : '' : '', 
-        window.max.state ? (window.max.side === 'right') ? 'max-right' : '' : '']"
-        :style="{'z-index': window.z}"
+        :class="[window.state.moving ? 'moving' : '', window.state.previewing ? 'previewing' : '', 
+        window.state.max.state ? (window.state.max.side === 'top') ? 'max-top' : '' : '', 
+        window.state.max.state ? (window.state.max.side === 'left') ? 'max-left' : '' : '', 
+        window.state.max.state ? (window.state.max.side === 'right') ? 'max-right' : '' : '']"
+        :style="{'z-index': window.state.z}"
         :dragSelector="dragSelector" :active="handlers" :fit-parent="true"
-        :width="window.w" :height="window.h"
-        :left="window.x" :top="window.y"
-        :min-width="(window.minSize.x) ? window.minSize.x : min.w" :min-height="(window.minSize.y) ? window.minSize.y : min.h"
+        :width="window.state.w" :height="window.state.h"
+        :left="window.state.x" :top="window.state.y"
+        :min-width="(window.settings.minSize.x) ? window.settings.minSize.x : min.w" :min-height="(window.settings.minSize.y) ? window.settings.minSize.y : min.h"
         @mount="evtHandler($event, index)"
         @mousedown="selectWindow(index)"
         @resize:start="evtHandler($event, index, state = 'start')"
@@ -439,8 +461,8 @@ function getRect(targP, section) {
         @drag:move="evtHandler($event, index, state = 'moving')"
         @drag:end="evtHandler($event, index, state = 'end')">
             <div class="w-picker" @mousedown="setReplaceCo" @dblclick="scale(index, 'top')"
-            :style="[window.barColor ? `background-color: ${window.barColor}` : '', window.textColor ? `color: ${window.textColor}` : '']">
-                <img :src="`./src/assets/icons/${window.icon}.png`" alt="icon" class="iconW" draggable="false">
+            :style="[window.settings.barColor ? `background-color: ${window.settings.barColor}` : '', window.settings.textColor ? `color: ${window.settings.textColor}` : '']">
+                <img :src="`./src/assets/icons/${window.settings.icon}.png`" alt="icon" class="iconW" draggable="false">
                 <label class="appName">{{ index }}</label>
                 <div class="buttonBar">
                     <button class="minimizeW" @click="minimize(index)">-</button>
@@ -452,14 +474,14 @@ function getRect(targP, section) {
                 </div>
             </div>
             
-            <div class="w-content"> <component :is="importApps[window.content]" v-bind="window.props"/></div>
-            <div class="frontPlate" v-if="(window.content === 'iFrame' && focusWindow !== index)"></div>
+            <div class="w-content"> <component :is="importApps[window.settings.content]" v-bind="window.settings.props"/></div>
+            <div class="frontPlate" v-if="(window.settings.content === 'iFrame' && focusWindow !== index)"></div>
         </vue-resizable> 
     </div>
     <div class="toolbar">
         <button @click="log">Log</button>
         <button @click="clearStorage">Clear</button>
-        <div class="minimContainer" v-for="(window, index) of minWindows">
+        <div class="minimContainer" v-for="(window, index) of apps">
             <div class="minimApp" :id="index" @click="unMinimize(index)" :title="index">
                 <img :src="`./src/assets/icons/${window.icon}.png`" alt="icon" draggable="false">
             </div>
