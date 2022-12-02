@@ -3,6 +3,7 @@ import VueResizable from 'vue-resizable';
 import { onMounted, ref } from "vue";
 import AdminWindowVue from './app/AdminWindow.vue';
 import iFrameVue from './app/iFrame.vue';
+import { computed } from '@vue/reactivity';
 
 
 // Paramètres des déplacement des apps
@@ -16,7 +17,7 @@ let replaceCo = ref({x: 0, y: 0});
 
 let z_index = ref(1);
 
-let focusWindow = ref("");
+// let focusWindow = ref("");
 
 
 const importApps = ref({
@@ -54,8 +55,8 @@ let apps = ref({
     },
     "RefineryCalc": {
         state: {
-            x: 600,
-            y: 300,
+            x: 200,
+            y: 100,
             w: 450,
             h: 300,
             z: 1,
@@ -85,7 +86,7 @@ let apps = ref({
     "Minecraft": {
         state: {
             x: 600,
-            y: 500,
+            y: 300,
             w: 250,
             h: 300,
             z: 1,
@@ -106,82 +107,42 @@ let apps = ref({
             },
             barColor: false,
             textColor: false,
+            content: "iFrame",
+            props: {
+                url: "https://minecraft.fandom.com/wiki/Minecraft_Wiki",
+            }
         }    
     }
 });
 
-let activesWindows = ref({
-    "Administrator": {
-        x: 300,
-        y: 150,
-        w: 300,
-        h: 200,
-        z: 1,
-        max: {
-            state: false,
-            side: ""
-        },
-        icon: "Admin",
-        moving: false,
-        minSize: {
-            x: 402, // false si désactivé (qd même 100x100px)
-            y: 480
-        },
-        focus: false,
-        barColor: '#000',
-        textColor: 'rgb(255, 72, 0)',
-        previewing: false,
-        content : "adminComp",
-    },
-    "RefineryCalc": {
-        x: 600,
-        y: 300,
-        w: 450,
-        h: 300,
-        z: 1,
-        max: {
-            state: false,
-            side: ""
-        },
-        icon: "icon_spoty",
-        moving: false,
-        minSize: {
-            x: 850,
-            y: 500
-        },
-        focus: false,
-        barColor: '#455f78',
-        textColor: false,
-        previewing: false,
-        content: "iFrame",
-        props: {
-            url: "http://outofspace.fr/RafineryCalcJs/",
-        }
-    }
+
+
+/**
+ * Retourne les apps actives à l'écran
+ */
+let activesWindows = computed(() => {
+    const arrayTemp = Object.entries(apps.value);
+    const filtered = arrayTemp.filter(([key, value]) => {
+        return value.state.active === true;
+    });
+    return Object.fromEntries(filtered);
 });
 
-let minWindows = ref({
-    "Minecraft": {
-        x: 600,
-        y: 500,
-        w: 250,
-        h: 300,
-        z: 1,
-        max: {
-            state: false,
-            side: ""
-        },
-        icon: "minecraft-icon",
-        moving: false,
-        minSize: {
-            x: false,
-            y: false
-        },
-        focus: false,
-        barColor: false,
-        textColor: false,
-        previewing: false
-    }
+let focusWindow = computed(() => {
+    const arrayTemp = Object.entries(apps.value);
+    let z = 0;
+    let index;
+    const filtered = arrayTemp.filter(([key, value]) => {
+        if(value.state.active === true) {
+            if(z < value.state.z) {
+                z = value.state.z;
+                index = key;
+            } 
+            return true;
+        }
+    });
+    console.log(index);
+    return index;
 });
 
 // console.log(sessionStorage);
@@ -195,38 +156,25 @@ if (!sessionStorage.accessToken) {
 // Juste avant l'affichage
 onMounted(() => {
     // Si localStorage.activesWindows contient qqchose
-    if (localStorage.activesWindows) {
-        const data = JSON.parse(localStorage.activesWindows);
-        apps.settings = {};
+    if (localStorage.apps) {
+        const data = JSON.parse(localStorage.apps);
+        apps.value = {};
         
         // Boucle pour remplir le tableau des fenêtres actives à partir des datas dans les cookies
         for (const window in data) {
-            apps.settings[window] = data[window];
+            apps.value[window] = data[window];
         }
     }
-    
-    
-    // Si localStorage.minWindows contient qqchose
-    if (localStorage.minWindows) {
-        const data = JSON.parse(localStorage.minWindows);
-        minWindows.value = {};
 
-        // Boucle pour remplir le tableau des fenêtres actives à partir des datas dans les cookies
-        for (const window in data) {
-            minWindows.value[window] = data[window];
-        }
+    // Setup initial du z-index pour l'affichage superposé
+    for (const app of Object.entries(apps.value)) {
+        // console.log(app[i]);
+        app[1].state.z = z_index.value++;
     }
 
     if (localStorage.focusWindow) {
-        focusWindow.value = localStorage.focusWindow;
+        selectWindow(localStorage.focusWindow, true);
     }
-
-
-    // Setup initial du z-index pour l'affichage superposé
-    for (const app of Object.entries(apps.settings)) {
-        app[1].z = z_index.value++;
-    }
-    selectWindow(focusWindow.value);
 });
 
 /**
@@ -237,25 +185,24 @@ onMounted(() => {
  */
 function evtHandler(data, app, state) {
     // Redéfinit les variables des objet par rapport au depl et resize
-    apps.settings[app].w = data.width;
-    apps.settings[app].h = data.height;
-    apps.settings[app].x = data.left;
-    apps.settings[app].y = data.top;
+    apps.value[app].state.w = data.width;
+    apps.value[app].state.h = data.height;
+    apps.value[app].state.x = data.left;
+    apps.value[app].state.y = data.top;
     
     // Qd la fenêtre est en déplacement
     if (state === "moving") {
-        apps.settings[app].moving = true;
+        apps.value[app].state.moving = true;
         const page = document.querySelector(".page");
         const pageRect = page.getBoundingClientRect();
     
         // Check si la fenêtre a été agrandie, si oui remet à taille normale ------------
-        if (apps.settings[app].max.state) {
-            apps.settings[app].max.state = false;
+        if (apps.value[app].state.max.state) {
+            apps.value[app].state.max.state = false;
 
-            
             // Déplacer la fenêtre sur les coordonées de la souris 
-            apps.settings[app].x = replaceCo.value.x - (data.width / 2);
-            apps.settings[app].y = replaceCo.value.y - 10 - pageRect.top;
+            apps.value[app].state.x = replaceCo.value.x - (data.width / 2);
+            apps.value[app].state.y = replaceCo.value.y - 10 - pageRect.top;
         } 
 
         // Détections des upscales ------------------------------------------------------
@@ -266,7 +213,7 @@ function evtHandler(data, app, state) {
         if (data.top <= enterZone) {
             // console.log("top");
             placer.value.preview = true;
-            apps.settings[app].previewing = true;
+            apps.value[app].state.previewing = true;
             placer.value.side = "top";
 
         } else if (data.top > exitZone && placer.value.preview && placer.value.side === "top") {
@@ -277,7 +224,7 @@ function evtHandler(data, app, state) {
         if (data.left <= enterZone) {
             // console.log("left");
             placer.value.preview = true;
-            apps.settings[app].previewing = true;
+            apps.value[app].state.previewing = true;
             placer.value.side = "left";
 
         } else if (data.left > exitZone && placer.value.preview && placer.value.side === "left") {
@@ -288,7 +235,7 @@ function evtHandler(data, app, state) {
         if (data.left + data.width >= pageRect.width - enterZone) {
             // console.log("right");
             placer.value.preview = true;
-            apps.settings[app].previewing = true;
+            apps.value[app].state.previewing = true;
             placer.value.side = "right";
 
         } else if (data.left + data.width < pageRect.width - exitZone && placer.value.preview && placer.value.side === "right") {
@@ -301,17 +248,17 @@ function evtHandler(data, app, state) {
 
     if (state === "resize") {
         // Check si la fenêtre a été agrandie, si oui remet à taille normale ------------
-        if (apps.settings[app].max.state) {
+        if (apps.value[app].state.max.state) {
             const appNode = document.querySelector("#" + app);
             const page = document.querySelector(".page");
             const rectApp = getRect(appNode, page);
             
-            apps.settings[app].w = rectApp.width;
-            apps.settings[app].h = rectApp.height;
-            apps.settings[app].x = rectApp.left;
-            apps.settings[app].y = rectApp.top;
+            apps.value[app].state.w = rectApp.width;
+            apps.value[app].state.h = rectApp.height;
+            apps.value[app].state.x = rectApp.left;
+            apps.value[app].state.y = rectApp.top;
 
-            apps.settings[app].max.state = false;
+            apps.value[app].state.max.state = false;
         } 
     }
 
@@ -321,7 +268,7 @@ function evtHandler(data, app, state) {
             scale(app, placer.value.side);
         }
 
-        apps.settings[app].moving = false;
+        apps.value[app].state.moving = false;
         saveState();
     }
 }
@@ -336,9 +283,8 @@ function setReplaceCo(e) {
  * Sauvegarde l'état du système, les tableaux de fenètres actives et minimisées, et la fenêtre en focus
  */
 function saveState() {
-    localStorage.setItem("activesWindows", JSON.stringify(apps.settings));
-    localStorage.setItem("focusWindow", JSON.stringify(focusWindow.value));
-    localStorage.setItem("minWindows", JSON.stringify(minWindows.value));
+    localStorage.setItem("apps", JSON.stringify(apps.value));
+    localStorage.setItem("focusWindow", focusWindow.value);
     
     const page = document.querySelector(".page");
     const pageRect = page.getBoundingClientRect();
@@ -364,10 +310,11 @@ function clearStorage() {
  * Envoie la fenêtre dans la barre des tâches
  * @param {*} index 
  */
-function minimize(index) {
-    minWindows.value[index] = apps.settings[index];
-    delete apps.settings[index];
-    focusWindow.value = Object.keys(apps.settings)[Object.keys(apps.settings).length - 1];
+function minimize(app) {
+    apps.value[app].state.active = false;
+
+    focusWindow.value = Object.keys(apps.value)[Object.keys(apps.value).length - 1];
+    // console.log(focusWindow.value);
     saveState();
 }
 
@@ -375,24 +322,27 @@ function minimize(index) {
  * Sors la fenêtre de la barre des tâches et l'affiche
  * @param {*} index 
  */
-function unMinimize(index) {
-    apps.settings[index] = minWindows.value[index];
-    delete minWindows.value[index];
-    selectWindow(index);
+function unMinimize(app) {
+    if (!apps.value[app].state.active) {
+        apps.value[app].state.active = true;
+        selectWindow(app, true);
+    } else {
+        minimize(app);
+    }
 }
 
-function selectWindow(app) {  
-    if (focusWindow.value !== app) {
+function selectWindow(app, force) {  
+    if (focusWindow.value !== app || force) {
         z_index.value++;
-        apps.settings[app].z = z_index.value;
-        focusWindow.value = app;
+        apps.value[app].state.z = z_index.value;
+        // focusWindow.value = app;
         saveState();
     }
 }
 
 function scale(app, side) {
-    apps.settings[app].max.state = true;
-    apps.settings[app].max.side = side;
+    apps.value[app].state.max.state = true;
+    apps.value[app].state.max.side = side;
     previewReset(app);
 }
 
@@ -403,7 +353,7 @@ function scale(app, side) {
 function previewReset(app) {
     placer.value.preview = false;
     console.log(placer.value);
-    apps.settings[app].previewing = false;
+    apps.value[app].state.previewing = false;
 }
 
 /**
@@ -441,7 +391,7 @@ function getRect(targP, section) {
             placer.preview ? (placer.side === 'right') ? 'placer-visible placer-half-right' : '' : ''
         ]"></div>
 
-        <vue-resizable v-for="(window, index) in apps" v-if="window.state.active" :key="index" 
+        <vue-resizable v-for="(window, index) in activesWindows" :key="index" 
         :id="index" class="app"
         :class="[window.state.moving ? 'moving' : '', window.state.previewing ? 'previewing' : '', 
         window.state.max.state ? (window.state.max.side === 'top') ? 'max-top' : '' : '', 
@@ -474,16 +424,17 @@ function getRect(targP, section) {
                 </div>
             </div>
             
-            <div class="w-content"> <component :is="importApps[window.settings.content]" v-bind="window.settings.props"/></div>
-            <div class="frontPlate" v-if="(window.settings.content === 'iFrame' && focusWindow !== index)"></div>
+            <div class="w-content"> <component :is="importApps[window.settings.content]" v-bind="window.settings.props"/>
+                <div class="frontPlate" v-if="(window.settings.content === 'iFrame' && focusWindow !== index)"></div>
+            </div>
         </vue-resizable> 
     </div>
     <div class="toolbar">
         <button @click="log">Log</button>
         <button @click="clearStorage">Clear</button>
         <div class="minimContainer" v-for="(window, index) of apps">
-            <div class="minimApp" :id="index" @click="unMinimize(index)" :title="index">
-                <img :src="`./src/assets/icons/${window.icon}.png`" alt="icon" draggable="false">
+            <div class="minimApp" :id="index" @click="unMinimize(index)" :title="index" :class="[window.state.active ? 'active' : '']">
+                <img :src="`./src/assets/icons/${window.settings.icon}.png`" alt="icon" draggable="false">
             </div>
         </div>
     </div>
@@ -671,6 +622,7 @@ header {
     width: 100%;
     border-radius: 0 0 4px 4px;
     overflow: hidden;
+    position: relative;
 }
 
 .frontPlate {
@@ -784,7 +736,11 @@ header {
     border-bottom: 3px solid orange;
     border-radius: 3px;
 
-    transition: background-color .2s;
+    transition: background-color .2s, border-color .2s;
+
+    &.active {
+        border-color: #00ffdd;
+    }
 }
 
 .minimApp:hover {

@@ -179,7 +179,7 @@ function creerV(i){
 <div id = container>
     <div id = outer>
         <div id = en_tête> 
-            <h1>Admin</h1>
+            <div class="title">Admin</div>
         </div>
         <div id = inner>
             <div id = salon>
@@ -237,19 +237,12 @@ function creerV(i){
 }
 
 #body_window{
-  position: absolute;
-  top: 0px;
-  margin-top: 30px;
-  bottom: 0px;
-  left : 0px;
-  right: 0px;
   color: aliceblue;
   background-image: url("./src/assets/back/1092728.jpg");
-  background-size: cover;
- 
-    
-
-
+  background-size: cover; 
+  background-position: center;
+  height: 100%;
+  width: 100%;
 }
 
 
@@ -266,18 +259,19 @@ function creerV(i){
 #en_tête
 {
   width:100%;
-  height:40px;
   text-align: center;
   color: goldenrod;
   font-family: 'Lobster', cursive;
-  
-
 }
 #outer
 {
-  margin:20px auto;
   width:100%;
   height:80%;
+}
+
+.title {
+  font-size: 35px;
+  padding: 5px;
 }
 #inner
 {
