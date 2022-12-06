@@ -38,6 +38,7 @@ let apps = ref({
                 side: ""
             },
             moving: false,
+            resizing: false,
             focus: false,
             previewing: false,
             active: false
@@ -65,6 +66,7 @@ let apps = ref({
                 side: ""
             },
             moving: false,
+            resizing: false,
             focus: false,
             previewing: false,
             active: false
@@ -95,6 +97,7 @@ let apps = ref({
                 side: ""
             },
             moving: false,
+            resizing: false,
             focus: false,
             previewing: false,
             active: false
@@ -174,7 +177,8 @@ onMounted(() => {
         app[1].state.z = z_index.value++;
     }
 
-    if (localStorage.focusWindow) {
+    if (!(!localStorage.focusWindow || localStorage.focusWindow === "undefined")) {
+        console.log(localStorage.focusWindow);
         selectWindow(localStorage.focusWindow, true);
     }
 });
@@ -205,7 +209,17 @@ function evtHandler(data, app, state) {
             // Déplacer la fenêtre sur les coordonées de la souris 
             apps.value[app].state.x = replaceCo.value.x - (data.width / 2);
             apps.value[app].state.y = replaceCo.value.y - 10 - pageRect.top;
+
         } 
+        const cap = 40;
+
+        // Redimensionne si elle est trop grande
+        if (apps.value[app].state.w >= pageRect.width - cap) {
+            apps.value[app].state.w -= cap;
+        }
+        if (apps.value[app].state.h >= pageRect.height - cap) {
+            apps.value[app].state.h -= cap;
+        }
 
         // Détections des upscales ------------------------------------------------------
         const enterZone = 1;
@@ -249,6 +263,8 @@ function evtHandler(data, app, state) {
     }
 
     if (state === "resize") {
+        apps.value[app].state.resizing = true;
+
         // Check si la fenêtre a été agrandie, si oui remet à taille normale ------------
         if (apps.value[app].state.max.state) {
             const appNode = document.querySelector("#" + app);
@@ -271,6 +287,7 @@ function evtHandler(data, app, state) {
         }
 
         apps.value[app].state.moving = false;
+        apps.value[app].state.resizing = false;
         saveState();
     }
 }
@@ -329,7 +346,11 @@ function unMinimize(app) {
         apps.value[app].state.active = true;
         selectWindow(app, true);
     } else {
-        minimize(app);
+        if (app === focusWindow) {
+            minimize(app);
+        } else {
+            selectWindow(app);
+        }
     }
 }
 
@@ -385,17 +406,18 @@ function getRect(targP, section) {
     <div class="page">
         <div class="w-placer top" :class="[
             placer.preview ? (placer.side === 'top') ? 'placer-visible placer-maximized' : '' : ''
-        ]"></div>
+        ]" :style="{'z-index': activesWindows[focusWindow]?.state.z}"></div>
         <div class="w-placer left" :class="[
             placer.preview ? (placer.side === 'left') ? 'placer-visible placer-half-left' : '' : ''
-        ]"></div>
+        ]" :style="{'z-index': activesWindows[focusWindow]?.state.z}"></div>
         <div class="w-placer right" :class="[
             placer.preview ? (placer.side === 'right') ? 'placer-visible placer-half-right' : '' : ''
-        ]"></div>
+        ]" :style="{'z-index': activesWindows[focusWindow]?.state.z}"></div>
 
         <vue-resizable v-for="(window, index) in activesWindows" :key="index" 
         :id="index" class="app"
-        :class="[window.state.moving ? 'moving' : '', window.state.previewing ? 'previewing' : '', 
+        :class="[window.state.moving ? 'moving' : '', window.state.resizing ? 'resizing' : '',
+        window.state.previewing ? 'previewing' : '', 
         window.state.max.state ? (window.state.max.side === 'top') ? 'max-top' : '' : '', 
         window.state.max.state ? (window.state.max.side === 'left') ? 'max-left' : '' : '', 
         window.state.max.state ? (window.state.max.side === 'right') ? 'max-right' : '' : '']"
@@ -552,14 +574,24 @@ header {
     flex-direction: column;
     border-radius: 4px;
 
-    will-change: left, top;
-    // -webkit-transition: border-color .2s;
-    // -moz-transition: border-color .2s, left .01s, top .01s, height .02s, width .02s;
-    // -o-transition: border-color .2s, left .01s, top .01s, height .02s, width .02s;
-    // // transition: border-color .2s, left .01s linear, top .01s linear, height .02s linear, width .02s linear; 
+    will-change: left, top, width, height;
+    -webkit-transition: all .2s;
+    -moz-transition: all .2s;
+    -o-transition: all .2s;
+    transition: all .2s;
 
     &.moving {
-        z-index: 5;
+        -webkit-transition: left 0s, top 0s, width .2s, height .2s;
+        -moz-transition: left 0s, top 0s, width .2s, height .2s;
+        -o-transition: left 0s, top 0s, width .2s, height .2s;
+        transition: left 0s, top 0s, width .2s, height .2s;
+    }
+
+    &.resizing {
+        -webkit-transition: none;
+        -moz-transition: none;
+        -o-transition: none;
+        transition: none;
     }
 }
 

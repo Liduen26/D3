@@ -136,6 +136,7 @@ function transfer(id) {
     width: 100%;
     height: 100%;
 }
+
 .page {
     height: 100%;
     display: flex;
@@ -177,7 +178,7 @@ img[src=""] {
     border-radius: 3vh;
     font-size: 1.8vh;
 
-    & img {
+    img {
         width: 6vh;
         margin-right: 10px;
         border-radius: 50%;
@@ -208,11 +209,17 @@ img[src=""] {
     
     transition: all .3s;
     
-    &:hover {
-        background-color: rgba(128, 128, 128, 0.4);
+    .title {
+        border-radius: 10px;
+        transition: background-color .2s;
+        cursor: pointer;
+        
+        color: #bbbcbd;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        font-size: 3.1vh;
     }
     
-    & img {
+    img {
         height: 7vh;
         border-radius: 3.5vh;
         margin-right: 10px;
@@ -220,18 +227,12 @@ img[src=""] {
         transition: all .3s;
     }
     
-    &:hover img {
-        border-radius: 2vh;
-    }
-    
-    & .title {
-        border-radius: 10px;
-        transition: background-color .2s;
-        cursor: pointer;
+    &:hover {
+        background-color: rgba(128, 128, 128, 0.4);
         
-        color: #bbbcbd;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        font-size: 3.3vh;
+        img {
+            border-radius: 2.5vh;
+        } 
     }
 }
 </style>
