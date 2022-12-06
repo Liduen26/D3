@@ -211,9 +211,9 @@ function evtHandler(data, app, state) {
             apps.value[app].state.y = replaceCo.value.y - 10 - pageRect.top;
 
         } 
-        const cap = 40;
-
+        
         // Redimensionne si elle est trop grande
+        const cap = 30;
         if (apps.value[app].state.w >= pageRect.width - cap) {
             apps.value[app].state.w -= cap;
         }
