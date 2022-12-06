@@ -9,7 +9,7 @@ import { computed } from '@vue/reactivity';
 // Paramètres des déplacement des apps
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
-const min = { w: 100, h: 100 };
+const min = { w: 300, h: 200 };
 
 let placer = ref({state: false});
 
@@ -30,7 +30,7 @@ let apps = ref({
         state: {
             x: 300,
             y: 150,
-            w: 300,
+            w: 600,
             h: 200,
             z: 1,
             max: {
@@ -40,7 +40,7 @@ let apps = ref({
             moving: false,
             focus: false,
             previewing: false,
-            active: true
+            active: false
         },
         settings: {
             icon: "Admin",
@@ -67,7 +67,7 @@ let apps = ref({
             moving: false,
             focus: false,
             previewing: false,
-            active: true
+            active: false
         },
         settings: {
             icon: "icon_spoty",
@@ -85,10 +85,10 @@ let apps = ref({
     },
     "Minecraft": {
         state: {
-            x: 600,
+            x: 200,
             y: 300,
-            w: 250,
-            h: 300,
+            w: 950,
+            h: 500,
             z: 1,
             max: {
                 state: false,
@@ -97,7 +97,7 @@ let apps = ref({
             moving: false,
             focus: false,
             previewing: false,
-            active: true
+            active: false
         },
         settings: {
             icon: "minecraft-icon",
@@ -105,7 +105,7 @@ let apps = ref({
                 x: false,
                 y: false
             },
-            barColor: false,
+            barColor: "#004800",
             textColor: false,
             content: "iFrame",
             props: {
@@ -128,6 +128,9 @@ let activesWindows = computed(() => {
     return Object.fromEntries(filtered);
 });
 
+/**
+ * Contient le nom de la fenêtre qui a le plus grand z-index
+ */
 let focusWindow = computed(() => {
     const arrayTemp = Object.entries(apps.value);
     let z = 0;
@@ -141,7 +144,6 @@ let focusWindow = computed(() => {
             return true;
         }
     });
-    console.log(index);
     return index;
 });
 
@@ -415,8 +417,8 @@ function getRect(targP, section) {
                 <img :src="`./src/assets/icons/${window.settings.icon}.png`" alt="icon" class="iconW" draggable="false">
                 <label class="appName">{{ index }}</label>
                 <div class="buttonBar">
-                    <button class="minimizeW" @click="minimize(index)">-</button>
-                    <button class="closeW">
+                    <button class="minimizeW" @click="minimize(index)" title="Minimiser">-</button>
+                    <button class="closeW" title="Fermer (Non fonctionnel)">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
                             <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                         </svg>

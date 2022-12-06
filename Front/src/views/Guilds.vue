@@ -31,8 +31,8 @@ if (!accessToken) {
         avatarUser.value = avatar;
     })
     .catch(console.error);
-
-
+    
+    
     
     
     const fetchMyGuilds = fetch('https://discord.com/api/users/@me/guilds', {
@@ -40,13 +40,11 @@ if (!accessToken) {
             authorization: `${tokenType} ${accessToken}`,
         },
     })
-        .then(result => result.json())
-        .then(response => {
-            myGuilds.value = response;
-        })
-        .catch(console.error);
-
-    
+    .then(result => result.json())
+    .then(response => {
+        myGuilds.value = response;
+    })
+    .catch(console.error);
     
     const fetchD3Guilds = fetch(url + '/api/servers', {
         method: 'GET',
@@ -54,27 +52,33 @@ if (!accessToken) {
             accept: 'application/json',
         },
     })
-        .then(result => result.json())
-        .then(response => {
-            d3Guilds.value = response;
-        })
-        .catch(console.error);
+    .then(result => result.json())
+    .then(response => {
+        d3Guilds.value = response;
+    })
+    .catch(console.error);
     
     Promise.all([fetchMyGuilds, fetchD3Guilds])
     .then(responses => {
         let tab = [];
-
+        
         for (let i = 0; i < myGuilds.value.length; i++) {
             for (let j = 0; j < d3Guilds.value.length; j++) {
                 if (d3Guilds.value[j].id === myGuilds.value[i].id) {
-                    tab.push(myGuilds.value[i]);
+                    let guild = myGuilds.value[i]
+                    tab.push(guild);
+                    
+                    if (guild.icon) {
+                        guild.icon = `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`
+                    } else {
+                        guild.icon = ``;
+                    }
                 }
             }
         }
-    
         guilds.value = tab;
     }); 
-
+    
 }
 
 
@@ -95,7 +99,7 @@ function transfer(id) {
             </label>
             <div class="guildList">
                 <router-link v-for="guild in guilds" class="guild" to="/windaube_XP-TDR" draggable="false">
-                    <img :src="`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png`" draggable="false">
+                    <img :src="guild.icon" draggable="false">
                     <div class="title" :id="guild.id" @click="transfer(guild.id)">{{ guild.name }}</div>
                 </router-link>
             </div>
@@ -104,6 +108,26 @@ function transfer(id) {
 </template>
 
 <style scoped lang="scss">
+
+* {
+    // --primary: hsl(220, calc(1 * 7.7%), 22.9%); couleurs discord
+    // --secondary: hsl(223, calc(1 * 6.9%), 19.8%);
+
+    // Scrollbar for Firefox
+    scrollbar-width: thin;
+    scrollbar-color: #202225 #2f3136;
+}
+
+/* Scrollbar for Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+    width: 0.9vh;
+}
+*::-webkit-scrollbar-track {
+    background: #2f3136;
+}
+*::-webkit-scrollbar-thumb {
+    background-color: #202225;
+}
 
 #backgroundImg {
     background: center/cover url("../assets/back/Squadron\ 42\ -\ Star\ Citizen\ Screenshot\ 2022.05.22\ -\ 17.05.28.22.png");
@@ -125,45 +149,52 @@ function transfer(id) {
     bottom: 0;
 }
 
+img[src=""] {
+    opacity: 100%;
+    border: none !important;
+}
 
 .container {
-    padding: 1vh;
-    background-color: #18191c;
+    padding: 1.3vh;
+    background-color: #1a1b1ee8;
     color: #bbbcbd;
-    border-radius: 5px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-    border-radius: 3vh;
+    border-radius: 3.5vh;
     box-shadow: 0px 0px 8px 1px rgba(0, 0, 0, 0.5);
-
-    width: 50vh;
+    
+    width: 60vh;
     max-height: 42vh;
+    
 }
 
 #info {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     display: flex;
     align-items: center;
-    background-color: rgba(128, 128, 128, 0.15);
+    background-color: rgba(128, 128, 128, 0.17);
     padding-right: 20px;
     border-radius: 3vh;
-    font-size: 1.7vh;
+    font-size: 1.8vh;
+
+    & img {
+        width: 6vh;
+        margin-right: 10px;
+        border-radius: 50%;
+        border: 1px solid black;
+    }
 }
-#info img {
-    width: 6vh;
-    margin-right: 10px;
-    border-radius: 50%;
-    border: 1px solid black;
-}
+
+
 
 .guildList {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: safe center;
     height: 100%;
     width: 100%;
+    overflow-y: auto;
+    margin-top: 10px;
 }
 
 .guildList .guild {
@@ -173,24 +204,31 @@ function transfer(id) {
     align-items: center;
     width: 85%;
     border-radius: 1vh;
-    margin-top: 20px;
-
+    margin-top: 10px;
+    
+    transition: all .3s;
+    
     &:hover {
         background-color: rgba(128, 128, 128, 0.4);
     }
-
+    
     & img {
-        width: 7vh;
-        border-radius: 3vh;
+        height: 7vh;
+        border-radius: 3.5vh;
         margin-right: 10px;
-        border: 1px solid bla;
+        border: 1px solid black;
+        transition: all .3s;
     }
-
+    
+    &:hover img {
+        border-radius: 2vh;
+    }
+    
     & .title {
         border-radius: 10px;
         transition: background-color .2s;
         cursor: pointer;
-
+        
         color: #bbbcbd;
         font-family: Verdana, Geneva, Tahoma, sans-serif;
         font-size: 3.3vh;
