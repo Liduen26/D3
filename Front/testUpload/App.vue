@@ -49,7 +49,7 @@ function upload(e) {
     text-align: center;
 }
 
-form {
+input[type="file"] {
     /* display: none; */
 }
 </style>
