@@ -5,118 +5,49 @@ import AdminWindowVue from './app/AdminWindow.vue';
 import iFrameVue from './app/iFrame.vue';
 import { computed } from '@vue/reactivity';
 
+import { apps } from '../stores/apps.js';
+
+// Imports des composants dans les apps
+const importApps = ref({
+    "adminComp": AdminWindowVue,
+    "iFrame": iFrameVue
+});
+
 
 // Paramètres des déplacement des apps
 const dragSelector = ".w-picker";
 const handlers = ["r", "rb", "b", "lb", "l", "lt", "t", "rt"];
 const min = { w: 300, h: 200 };
 
+// Gère la div de preview de l'agrandissement
 let placer = ref({state: false});
 
+// Remplace les coordonées au besoin dans un déplacement
 let replaceCo = ref({x: 0, y: 0});
 
+// Gère l'axe Z
 let z_index = ref(1);
 
-// let focusWindow = ref("");
 
-
-const importApps = ref({
-    "adminComp": AdminWindowVue,
-    "iFrame": iFrameVue
-});
-
-let apps = ref({
-    "Administrator": {
-        state: {
-            x: 300,
-            y: 150,
-            w: 600,
-            h: 200,
-            z: 1,
-            max: {
-                state: false,
-                side: ""
-            },
-            moving: false,
-            resizing: false,
-            focus: false,
-            previewing: false,
-            active: false
+// Chargement des objets states des apps
+for (const app of Object.entries(apps.value)) {
+    app[1].state = {
+        x: 200,
+        y: 50,
+        w: 600,
+        h: 500,
+        z: 1,
+        max: {
+            state: false,
+            side: ""
         },
-        settings: {
-            icon: "Admin",
-            minSize: {
-                x: 402, // false si désactivé (qd même 100x100px)
-                y: 480
-            },
-            barColor: '#000',
-            textColor: 'rgb(255, 72, 0)',
-            content : "adminComp",
-        }
-    },
-    "RefineryCalc": {
-        state: {
-            x: 200,
-            y: 100,
-            w: 450,
-            h: 300,
-            z: 1,
-            max: {
-                state: false,
-                side: ""
-            },
-            moving: false,
-            resizing: false,
-            focus: false,
-            previewing: false,
-            active: false
-        },
-        settings: {
-            icon: "icon_spoty",
-            minSize: {
-                x: 850,
-                y: 500
-            },
-            barColor: '#455f78',
-            textColor: false,
-            content: "iFrame",
-            props: {
-                url: "http://outofspace.fr/RafineryCalcJs/",
-            }
-        }
-    },
-    "Minecraft": {
-        state: {
-            x: 200,
-            y: 300,
-            w: 950,
-            h: 500,
-            z: 1,
-            max: {
-                state: false,
-                side: ""
-            },
-            moving: false,
-            resizing: false,
-            focus: false,
-            previewing: false,
-            active: false
-        },
-        settings: {
-            icon: "minecraft-icon",
-            minSize: {
-                x: false,
-                y: false
-            },
-            barColor: "#004800",
-            textColor: false,
-            content: "iFrame",
-            props: {
-                url: "https://minecraft.fandom.com/wiki/Minecraft_Wiki",
-            }
-        }    
+        moving: false,
+        resizing: false,
+        focus: false,
+        previewing: false,
+        active: false
     }
-});
+}
 
 
 
@@ -126,6 +57,7 @@ let apps = ref({
 let activesWindows = computed(() => {
     const arrayTemp = Object.entries(apps.value);
     const filtered = arrayTemp.filter(([key, value]) => {
+        console.log(value);
         return value.state.active === true;
     });
     return Object.fromEntries(filtered);
@@ -346,7 +278,7 @@ function unMinimize(app) {
         apps.value[app].state.active = true;
         selectWindow(app, true);
     } else {
-        if (app === focusWindow) {
+        if (app === focusWindow.value) {
             minimize(app);
         } else {
             selectWindow(app);
