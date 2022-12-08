@@ -1,6 +1,6 @@
 # D3, powered by Windaube XP-TDR
 
-Ceci est un projet de S4, qui à pour but de lier un bot discord avec une application web. 
+Ceci est un projet de S4 INTECH, qui a pour but de lier un bot discord avec une application web. 
 L'application web - Windaube XP-TDR - est faite pour ressembler à un OS, dans lequel est implémenté plusieurs applis, qui permettent différentes fonctionnalités liées avec le bot discord. 
 
 On peut citer par exemple : 
@@ -32,7 +32,7 @@ Avant de passer à la suite, vérifiez bien que votre bot est sur un serveur. si
 
 ## 1. Le Back-end (API + BOT)
 
-Dans un cmd Unix (ex: git bash, powershell), en partant du dossier racine du projet, tapez les lignes suivantes : 
+Dans un cmd Unix (Git Bash, Powershell...), en partant du dossier racine du projet, tapez les lignes suivantes : 
 
 ```shell
 $ cd Bot/
@@ -47,13 +47,6 @@ Le programme devrait fonctionner maintenant, si vous voyez les logs, il devrait 
 
 ## 2. Le Front-end
 
-Commencer par créer un fichier **.env** au niveau du dossier Front, dans lequel vous mettez ceci : 
-```
-VITE_URL_API='http://localhost:5000'
-```
-Ceci vous permettra de changer l'url sur lequel le front envoie ses requêtes à l'API si besoin
-
-
 Ensuite, ouvrez un nouveau CMD, et toujours en partant de la racine du projet, tapez les lignes suivantes : 
 
 ```shell
@@ -66,6 +59,22 @@ $ npm run dev
 Après qqles secondes, la console devrait afficher un lien sur lequel vous pouvez cliquer, et qui vous emmènera sur le site !
 
 Et voilà, bien joué !
+
+# Lancement (déjà Setup)
+
+Ouvrez un terminal Unix (Git Bash, Powershell...) et tapez ceci à partir de la raçine du projet :
+```shell
+$ cd API/
+$ node main.js
+```
+
+Puis, dans un autre terminal, toujours à partir de la raçine : 
+```shell
+$ cd Front/
+$ npm run dev
+```
+
+Et voilà, les deux modules sont a présent démarrés ! Vous pouvez cliquer sur le lien dans le dernier cmd pour ouvrir l'interface.
 
 # Annexe - Vous n'avez pas de bot discord ?
 
